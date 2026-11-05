@@ -2,7 +2,7 @@
 
 A private Turkish productivity workspace for Windows and the web. No billing, analytics, paid AI API, public registration, or seeded activity.
 
-**Status: working local productivity build; not yet approved for daily Windows reminder reliance.** Web/UI builds and local automated checks run in this repository. Native Rust compilation, installer behavior, live Supabase email authentication, and two-device cloud sync require the separate gates in [delivery status](docs/DELIVERY.md). Do not infer native reliability from browser tests.
+**Status: working local productivity build; not yet approved for daily Windows reminder reliance.** Web/UI builds and local automated checks run in this repository. Windows CI passes Rust checking, six native unit tests and NSIS packaging. The installer was installed and launched locally. Actual reminder delivery/recovery, live Supabase email authentication, and two-device cloud sync still require the gates in [delivery status](docs/DELIVERY.md). Do not infer native reliability from browser tests.
 
 ## Run
 
@@ -31,7 +31,7 @@ The Vite browser preview uses IndexedDB. Only the real Tauri process uses SQLite
 
 ## Features
 
-Tasks with editing, dates, priorities, categories, project links, search, grouping, completion/undo, bulk completion, and archive. Bounded timezone-aware recurrence produces separate occurrences. Day/week/month planning supports moving a task to another day by dragging; precise start times are edited in the task form. Projects include task lists, kanban, milestones, bug type/severity, and notes. Habits have persistent daily logs. Focus sessions use timestamps, survive reloads, and create persistent native reminder records. Career contacts, applications, interactions and follow-ups are editable. Notes autosave, can be pinned/archived and converted into tasks/projects. The workspace contains validated ChatGPT links and manually registered Codex references. Twelve optional stdio MCP tools share the desktop database.
+Tasks with editing, dates, priorities, categories, project links, search, grouping, completion/undo, bulk completion, and archive. Bounded timezone-aware recurrence produces separate occurrences with independently persisted optional alarms. Native generation rolls the 35-day window forward even with the webview hidden. Failed or uncertain native dispatches can be reviewed and explicitly retried in Settings. Day/week/month planning supports moving a task to another day by dragging; precise start times are edited in the task form. Projects include task lists, kanban, milestones, bug type/severity, and notes. Habits have persistent daily logs. Focus sessions use timestamps, survive reloads, and create persistent native reminder records. Career contacts, applications, interactions and follow-ups are editable. Notes autosave, can be pinned/archived and converted into tasks/projects. The workspace contains validated ChatGPT links and manually registered Codex references. Twelve optional stdio MCP tools share the desktop database.
 
 Cloud access uses Supabase email OTP for an existing owner. Sync retains dirty records, checks versions, preserves tombstones, retries failures, and presents both conflict versions. Native auth uses Windows Credential Manager; web auth uses session storage. The cloud implementation still needs live verification.
 

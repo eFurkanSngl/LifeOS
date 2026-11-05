@@ -4,7 +4,7 @@
 
 Install Node 24 and pnpm 11.25.0, then `pnpm install --frozen-lockfile`. `pnpm dev` starts Next.js at http://127.0.0.1:3000. No cloud account is required. `pnpm dev:desktop` is a browser preview, not a native reminder process.
 
-For Windows Tauri install current stable Rust (MSVC toolchain), Visual Studio Build Tools with **Desktop development with C++**, **MSVC x64/x86 build tools** and **Windows 10/11 SDK**, and Microsoft Edge WebView2 Runtime. In this workspace Rust 1.99.1 was installed only under `.tools`; the Visual Studio installer exists but the C++ linker is missing. The actual cargo check stopped at `link.exe not found`, so native typechecking, native tests, and installer validation are not passed. Install the missing C++ workload through Visual Studio Installer, then use a Developer PowerShell/terminal. To reuse this workspace's local Rust without a global install, run `$env:CARGO_HOME=(Join-Path (Get-Location) '.tools/cargo')`, `$env:RUSTUP_HOME=(Join-Path (Get-Location) '.tools/rustup')`, and `$env:PATH="$env:CARGO_HOME\bin;$env:PATH"` in the current PowerShell session. This does not modify the system PATH. Open a new terminal and verify `rustc --version` and `cargo --version`. Then:
+For Windows Tauri install current stable Rust (MSVC toolchain), Visual Studio Build Tools with **Desktop development with C++**, **MSVC x64/x86 build tools** and **Windows 10/11 SDK**, and Microsoft Edge WebView2 Runtime. In this workspace Rust 1.99.1 was installed only under `.tools`; the Visual Studio installer exists but the C++ linker is missing. The actual cargo check stopped at `link.exe not found`, so local source compilation remains blocked. GitHub Windows CI separately passed cargo check, six native unit tests and NSIS packaging; the downloaded installer was installed and launched locally (see NATIVE_VERIFICATION.md). Install the missing C++ workload through Visual Studio Installer, then use a Developer PowerShell/terminal. To reuse this workspace's local Rust without a global install, run `$env:CARGO_HOME=(Join-Path (Get-Location) '.tools/cargo')`, `$env:RUSTUP_HOME=(Join-Path (Get-Location) '.tools/rustup')`, and `$env:PATH="$env:CARGO_HOME\bin;$env:PATH"` in the current PowerShell session. This does not modify the system PATH. Open a new terminal and verify `rustc --version` and `cargo --version`. Then:
 
 ```powershell
 pnpm desktop
@@ -15,6 +15,8 @@ cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml
 The installer is generated under `apps/desktop/src-tauri/target/release/bundle/nsis`. Unsigned installers can trigger SmartScreen; no signing certificate is configured. The builder never silently enables startup or tray persistence.
 
 ## Supabase
+
+The owner selected a fresh project in a different Supabase account; it has not been created yet. Do not use the currently connected Drawtopia or MakingManga projects. Once the new account is connected and its LifeOS project is explicitly identified, apply the migration and run the live checks below.
 
 Use a dedicated private project. Keep service-role/secret keys out of clients and out of chat. Create your single owner in Auth admin, disable public signup and anonymous sign-in, and configure production email delivery. Update the email OTP template to show `{{ .Token }}`; the app uses code entry with `shouldCreateUser:false`, not public signup or a magic-link redirect.
 
