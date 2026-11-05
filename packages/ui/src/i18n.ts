@@ -1,4 +1,16 @@
 export const tr = {
+  dispatchSubmitted: "Gönderim istendi",
+  dispatchFailed: "Gönderilemedi",
+  dispatchUncertain: "Sonuç belirsiz",
+  dispatchInProgress: "Gönderiliyor",
+  windowsNotificationSettings: "Windows bildirim ayarlarını aç",
+  refreshHistory: "Geçmişi yenile",
+  notificationSettingsHint:
+    "İzinleri ve Rahatsız Etmeyin ayarını Windows üzerinden kontrol et. Gönderim kaydı, bildirimin ekranda göründüğünü doğrulamaz.",
+  noNotificationEvents: "Henüz kalıcı bildirim kaydı yok.",
+  retryNotification: "Yeniden gönder",
+  retryNotificationHint:
+    "Önceki bildirimin görünmüş olması mümkün. Yeniden gönderme ikinci bir bildirime yol açabilir. Sessiz saatler uygulanır.",
   reminderOffsetMinutes: "Kaç dakika önce hatırlatılsın?",
   reminderNeedsSchedule: "Hatırlatıcı için planlanan başlangıç gerekli.",
   draft: "taslak",

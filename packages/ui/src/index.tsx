@@ -29,6 +29,7 @@ import {
 import { motion, MotionConfig } from "motion/react";
 import { type Entity, type Kind, entities, SETTINGS_ID } from "@lifeos/core";
 import { isTauri } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { tr, label } from "./i18n";
 import { useLife } from "./store";
 import { RecordForm, Modal } from "./components";
@@ -81,6 +82,30 @@ export function LifeOS({
     [online, setOnline] = useState(true);
   const edit: Edit = (kind, record, initial) =>
     setEditing({ kind, record, initial });
+  useEffect(() => {
+    if (!isTauri()) return;
+    let active = true;
+    let dispose: (() => void) | undefined;
+    void listen<string>("open-reminder", async (event) => {
+      try {
+        const record = (await store.service().list()).find(
+          (r) => r.id === event.payload && r.kind === "reminder" && !r.deleted,
+        );
+        if (record) setEditing({ kind: "reminder", record });
+      } catch (error) {
+        store.setError(String(error));
+      }
+    })
+      .then((stop) => {
+        if (active) dispose = stop;
+        else stop();
+      })
+      .catch((error) => store.setError(String(error)));
+    return () => {
+      active = false;
+      dispose?.();
+    };
+  }, []);
   const navigate = (value: string) => {
     setPage(value);
     setSearch("");

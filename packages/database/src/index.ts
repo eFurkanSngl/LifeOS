@@ -168,6 +168,10 @@ export class LifeService {
             !existing || moved || reactivated
               ? "pending"
               : existing.data.status,
+          deliveredAt:
+            !existing || moved || reactivated
+              ? undefined
+              : existing.data.deliveredAt,
           sound: existing?.data.sound ?? false,
         };
         if (

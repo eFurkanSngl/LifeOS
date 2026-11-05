@@ -159,6 +159,54 @@ fn database_path(app: tauri::AppHandle) -> Result<String, String> {
         .to_string_lossy()
         .to_string())
 }
+#[tauri::command]
+fn notification_events(state: tauri::State<Store>) -> Result<Vec<Value>, String> {
+    let db = state.db.lock().map_err(|_| "Database lock failed")?;
+    let mut statement=db.prepare("SELECT e.reminder_id,e.fire_at,e.state,e.created_at,e.detail,COALESCE(json_extract(r.data,'$.title'),'') FROM notification_events e LEFT JOIN records r ON r.id=e.reminder_id ORDER BY e.created_at DESC LIMIT 100").map_err(|e|e.to_string())?;
+    let rows=statement.query_map([],|row|Ok(serde_json::json!({"reminderId":row.get::<_,String>(0)?,"fireAt":row.get::<_,String>(1)?,"state":row.get::<_,String>(2)?,"createdAt":row.get::<_,String>(3)?,"detail":row.get::<_,String>(4)?,"title":row.get::<_,String>(5)?}))).map_err(|e|e.to_string())?;
+    rows.collect::<Result<Vec<_>, _>>()
+        .map_err(|e| e.to_string())
+}
+fn requeue_notification(db: &mut Connection, id: &str) -> Result<(), String> {
+    let mut record = read_records(db)?
+        .into_iter()
+        .find(|r| r.id == id && r.kind == "reminder" && !r.deleted)
+        .ok_or("Hatırlatıcı bulunamadı.")?;
+    if !matches!(
+        record.data["status"].as_str(),
+        Some("pending" | "delivered")
+    ) {
+        return Err("Bu hatırlatıcı artık etkin değil.".into());
+    }
+    let expected = record.version;
+    record.version += 1;
+    record.dirty = true;
+    record.updated_at = Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Millis, true);
+    record.data["fireAt"] = (Utc::now() + chrono::Duration::seconds(1))
+        .to_rfc3339_opts(chrono::SecondsFormat::Millis, true)
+        .into();
+    record.data["status"] = "pending".into();
+    record.data.as_object_mut().map(|o| o.remove("deliveredAt"));
+    put(db, &record, expected)
+}
+#[tauri::command]
+fn retry_notification(
+    app: tauri::AppHandle,
+    state: tauri::State<Store>,
+    id: String,
+) -> Result<(), String> {
+    let mut db = state.db.lock().map_err(|_| "Database lock failed")?;
+    requeue_notification(&mut db, &id)?;
+    let _ = app.emit("records-changed", ());
+    Ok(())
+}
+#[tauri::command]
+fn open_notification_settings(app: tauri::AppHandle) -> Result<(), String> {
+    use tauri_plugin_opener::OpenerExt;
+    app.opener()
+        .open_url("ms-settings:notifications", None::<&str>)
+        .map_err(|e| e.to_string())
+}
 fn auth_entry() -> Result<keyring::Entry, String> {
     keyring::Entry::new("LifeOS", "supabase-session-manifest")
         .map_err(|_| "Windows credential store unavailable".into())
@@ -589,6 +637,7 @@ fn main() {
                 return Err("LifeOS database schema is newer than this application".into());
             }
             db.execute_batch(include_str!("../../../../packages/database/schema.sql"))?;
+            db.execute("UPDATE notification_events SET state='uncertain',detail='Application restarted before dispatch acknowledgement' WHERE state='dispatching'",[])?;
             app.manage(Store { db: Mutex::new(db) });
             use tauri_plugin_notification::{Action, ActionType};
             app.notification()
@@ -697,7 +746,10 @@ fn main() {
             auth_storage_get,
             auth_storage_set,
             auth_storage_remove,
-            open_external
+            open_external,
+            notification_events,
+            retry_notification,
+            open_notification_settings
         ])
         .run(tauri::generate_context!())
         .expect("LifeOS could not start");
@@ -720,5 +772,34 @@ mod tests {
         let sql="INSERT OR IGNORE INTO notification_events(reminder_id,fire_at,state,created_at) VALUES('a','2026-11-05','dispatching','now')";
         assert_eq!(db.execute(sql, []).unwrap(), 1);
         assert_eq!(db.execute(sql, []).unwrap(), 0);
+    }
+    #[test]
+    fn explicit_retry_preserves_old_claim_and_uses_new_instant() {
+        let mut db = Connection::open_in_memory().unwrap();
+        db.execute_batch(include_str!("../../../../packages/database/schema.sql"))
+            .unwrap();
+        let id = "12345678-1234-4000-8000-123456789012";
+        let record = Record {
+            id: id.into(),
+            kind: "reminder".into(),
+            data: serde_json::json!({"title":"Test","fireAt":"2026-01-01T00:00:00.000Z","status":"pending","sound":false}),
+            version: 1,
+            updated_at: "2026-01-01T00:00:00.000Z".into(),
+            deleted: false,
+            cloud_version: 0,
+            dirty: true,
+        };
+        put(&mut db, &record, 0).unwrap();
+        db.execute("INSERT INTO notification_events(reminder_id,fire_at,state,created_at) VALUES(?,'2026-01-01T00:00:00.000Z','uncertain','2026-01-01')",[id]).unwrap();
+        requeue_notification(&mut db, id).unwrap();
+        let row = read_records(&db).unwrap().remove(0);
+        assert_eq!(row.version, 2);
+        assert_ne!(row.data["fireAt"], record.data["fireAt"]);
+        assert_eq!(
+            db.query_row("SELECT count(*) FROM notification_events", [], |r| r
+                .get::<_, i64>(0))
+                .unwrap(),
+            1
+        );
     }
 }

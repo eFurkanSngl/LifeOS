@@ -15,7 +15,8 @@ export default defineConfig({
   webServer: {
     command: "pnpm --filter @lifeos/web start",
     url: "http://127.0.0.1:3000",
-    reuseExistingServer: !process.env.CI,
+    // Reusing a server after rebuilding Next can serve a mismatched asset set.
+    reuseExistingServer: process.env.LIFEOS_E2E_REUSE_SERVER === "1",
     timeout: 60000,
   },
 });

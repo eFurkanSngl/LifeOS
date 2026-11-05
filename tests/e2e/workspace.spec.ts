@@ -172,6 +172,8 @@ test("creates independent recurring occurrences", async ({ page }) => {
   }).format(new Date());
   await page.getByLabel("Planlanan başlangıç").fill(date + "T14:00");
   await page.getByLabel("Tekrar", { exact: true }).selectOption("daily");
+  await page.getByLabel("Hatırlatıcı da oluştur").check();
+  await page.getByLabel("Kaç dakika önce hatırlatılsın?").fill("10");
   await page
     .getByRole("dialog")
     .getByRole("button", { name: "Kaydet" })
@@ -190,6 +192,14 @@ test("creates independent recurring occurrences", async ({ page }) => {
   await expect(
     page.getByRole("button", { name: "Tamamla: Daily study" }),
   ).toHaveCount(34);
+  await page
+    .getByRole("button", { name: "Düzenle", exact: true })
+    .first()
+    .click();
+  await expect(page.getByLabel("Hatırlatıcı da oluştur")).toBeChecked();
+  await expect(page.getByLabel("Kaç dakika önce hatırlatılsın?")).toHaveValue(
+    "10",
+  );
 });
 test("checks a habit and restores the log after reload", async ({ page }) => {
   await page
@@ -374,6 +384,10 @@ test("saves timezone settings under the stable settings identity", async ({
     .getByRole("dialog")
     .getByRole("button", { name: "Kaydet" })
     .click();
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  await expect(
+    page.getByRole("definition").filter({ hasText: "Europe/London" }),
+  ).toBeVisible();
   await page.reload();
   await expect(
     page.getByRole("definition").filter({ hasText: "Europe/London" }),

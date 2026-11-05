@@ -21,6 +21,7 @@ import {
   ExternalLink,
 } from "./components";
 import { Backup, download, type Edit } from "./features";
+import { NotificationLog } from "./notification-log";
 export function Settings({ store, edit }: { store: LifeStore; edit: Edit }) {
   const [email, setEmail] = useState(""),
     [token, setToken] = useState(""),
@@ -116,6 +117,7 @@ export function Settings({ store, edit }: { store: LifeStore; edit: Edit }) {
               </label>
               <p className="muted">{tr.startupHint}</p>
             </div>
+            <NotificationLog store={store} />
           </>
         ) : (
           <p className="muted">{tr.inAppOnly}</p>
