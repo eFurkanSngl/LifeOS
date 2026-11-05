@@ -324,6 +324,7 @@ test("persists a reminder and supports snoozing and rescheduling", async ({
     .getByRole("dialog")
     .getByRole("button", { name: "Kaydet" })
     .click();
+  await expect(page.getByLabel("Hatırlatma zamanı *")).not.toBeVisible();
   await page.reload();
   await page
     .getByRole("button", { name: "Hatırlatmalar", exact: true })
