@@ -1,0 +1,12 @@
+{
+  "name": "@lifeos/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@lifeos/validation": "workspace:*",
+    "date-fns": "4.1.0",
+    "date-fns-tz": "3.2.0"
+  }
+}

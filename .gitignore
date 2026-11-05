@@ -1,0 +1,17 @@
+node_modules/
+.next/
+dist/
+target/
+.turbo/
+.env*
+!.env.example
+*.sqlite*
+*.db*
+test-results/
+playwright-report/
+*.log
+
+.tools/
+*.tsbuildinfo
+supabase/.temp/
+supabase/.branches/

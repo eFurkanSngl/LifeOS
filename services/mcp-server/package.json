@@ -1,0 +1,17 @@
+{
+  "name": "@lifeos/mcp-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@lifeos/core": "workspace:*",
+    "@lifeos/database": "workspace:*",
+    "@lifeos/validation": "workspace:*",
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "tsx": "4.23.0",
+    "zod": "4.6.6"
+  }
+}

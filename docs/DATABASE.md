@@ -1,0 +1,13 @@
+# Database and data integrity
+
+The typed record envelope is `{id,kind,data,version,updatedAt,deleted,cloudVersion,dirty}`. `id` is a UUID; metadata instants are UTC. `data` is parsed against a strict kind-specific Zod schema. `version` is a local revision and `cloudVersion` is the last acknowledged remote revision; they are intentionally distinct. Deleted records remain tombstones.
+
+SQLite uses `records`, `notification_events`, and `mcp_action_logs` (see packages/database/schema.sql). A reminder claim is unique on `(reminder_id, fire_at)`. WAL, a five-second busy timeout, parameterized SQL and version guards protect concurrent desktop/MCP writes. Personal database payloads are not encrypted at rest; protect the Windows account and disk, and treat JSON backups as private data.
+
+The v1 cloud model is one RLS-protected `lifeos_records` table keyed by `(user_id,id)`, with schema version, kind, JSONB payload, remote version and tombstone. Indexed owner/kind, update time and project references support common queries. A security-invoker trigger validates identity/version changes and owner-scoped project, task, habit, contact, milestone, focus and series references. Soft deletion keeps relationships recoverable. No physical DELETE grant is issued. No anonymous/public grants are provided.
+
+This is a deliberate vertical-slice simplification of the requested normalized model, **not a claim that all proposed relational tables exist**. Zod provides richer field validation than SQL currently does. A client with an authenticated token can issue own-row writes directly; PostgreSQL still enforces ownership, references and immutable identities, but full cross-field domain checks should be moved into SQL before relying on untrusted third-party clients.
+
+Migration path: preserve UUIDs, add typed relational tables by kind, backfill and validate them, migrate CAS RPC behind the same service boundary, then add validated composite owner-scoped foreign keys. Never drop record history during this transition. The canonical schema is supabase/schema.sql; the initial migration at supabase/migrations/20261105193417_initial_lifeos.sql was generated with the official CLI after recovering from package download timeouts. Do not run the canonical CREATE script against an existing populated deployment as a replacement for a migration.
+
+Backup export includes versioned records, including tombstones; it excludes secrets and native diagnostic/audit tables. Import validates the complete envelope before writes and skips existing IDs rather than overwriting them. Imported records are marked dirty with cloudVersion zero. Interrupted imports may be partial; rerunning the import safely skips records already added. Export before recovery or conflict resolution.

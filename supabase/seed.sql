@@ -1,0 +1,2 @@
+-- Intentionally empty. Create the single owner in Supabase Auth admin.
+-- No fabricated tasks, projects, activity, or public signup.

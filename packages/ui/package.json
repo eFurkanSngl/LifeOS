@@ -1,0 +1,25 @@
+{
+  "name": "@lifeos/ui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.tsx",
+    "./styles.css": "./src/styles.css"
+  },
+  "dependencies": {
+    "@lifeos/core": "workspace:*",
+    "@lifeos/database": "workspace:*",
+    "@lifeos/validation": "workspace:*",
+    "@lifeos/integrations": "workspace:*",
+    "@radix-ui/react-dialog": "1.1.15",
+    "@tauri-apps/plugin-autostart": "2.5.1",
+    "lucide-react": "0.468.0",
+    "motion": "12.23.24",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "zod": "4.6.6",
+    "@tauri-apps/api": "2.9.1",
+    "tailwindcss": "4.1.18"
+  }
+}

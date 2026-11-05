@@ -1,0 +1,13 @@
+{
+  "name": "@lifeos/database",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@lifeos/core": "workspace:*",
+    "@lifeos/validation": "workspace:*",
+    "@tauri-apps/api": "2.9.1",
+    "idb": "8.0.3"
+  }
+}
