@@ -9,6 +9,9 @@ import {
 } from "@lifeos/validation";
 export * from "@lifeos/validation";
 export const SETTINGS_ID = "00000000-0000-4000-8000-000000000001";
+export function taskReminderId(taskId: string) {
+  return (parseInt(taskId[0], 16) ^ 8).toString(16) + taskId.slice(1);
+}
 export const today = (timezone = "Europe/Istanbul", now = new Date()) =>
   format(toZonedTime(now, timezone), "yyyy-MM-dd");
 export const formatTime = (value: string, timezone = "Europe/Istanbul") =>

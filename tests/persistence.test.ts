@@ -1,6 +1,7 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { SqliteRepository } from "../packages/database/src/node";
 import { LifeService } from "../packages/database/src/index";
+import { taskReminderId } from "../packages/core/src/index";
 import { mkdtempSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
@@ -19,6 +20,95 @@ afterEach(() => {
   for (const c of cleanup.splice(0)) c();
 });
 describe("SQLite application service", () => {
+  it("creates one persistent alarm for every recurring occurrence", async () => {
+    const { service } = setup();
+    const template = await service.save("task", {
+      title: "Alarm study",
+      scheduledAt: new Date().toISOString(),
+      recurrence: { frequency: "daily", timezone: "Europe/Istanbul" },
+      reminderOffsetMinutes: 10,
+    });
+    const rows = await service.list(),
+      tasks = rows.filter((r) => r.data.seriesId === template.id),
+      alarms = rows.filter((r) => r.kind === "reminder");
+    expect(tasks).toHaveLength(35);
+    expect(alarms).toHaveLength(35);
+    expect(alarms.every((r) => tasks.some((t) => t.id === r.data.taskId))).toBe(
+      true,
+    );
+    const first = tasks[0];
+    expect(
+      alarms.find((r) => r.id === taskReminderId(first.id))?.data.fireAt,
+    ).toBe(
+      new Date(
+        Date.parse(String(first.data.scheduledAt)) - 600000,
+      ).toISOString(),
+    );
+    await service.save(
+      "task",
+      { ...first.data, status: "completed" },
+      first.id,
+      first.version,
+    );
+    expect(
+      (await service.list()).filter(
+        (r) => r.kind === "reminder" && r.data.status === "pending",
+      ),
+    ).toHaveLength(34);
+  });
+  it("does not reset a snoozed alarm when task notes change", async () => {
+    const { service } = setup();
+    const task = await service.save("task", {
+      title: "Study",
+      scheduledAt: "2026-11-07T11:00:00.000Z",
+      reminderOffsetMinutes: 0,
+    });
+    const alarm = (await service.list()).find((r) => r.kind === "reminder")!;
+    await service.save(
+      "reminder",
+      { ...alarm.data, fireAt: "2026-11-07T12:00:00.000Z" },
+      alarm.id,
+      alarm.version,
+    );
+    await service.save(
+      "task",
+      { ...task.data, notes: "Added notes" },
+      task.id,
+      task.version,
+    );
+    expect(
+      (await service.list()).find((r) => r.id === alarm.id)?.data.fireAt,
+    ).toBe("2026-11-07T12:00:00.000Z");
+  });
+  it("reschedules an existing alarm and disables it without duplicates", async () => {
+    const { service } = setup();
+    let task = await service.save("task", {
+      title: "Study",
+      scheduledAt: "2026-11-07T11:00:00.000Z",
+      reminderOffsetMinutes: 15,
+    });
+    task = await service.save(
+      "task",
+      { ...task.data, scheduledAt: "2026-11-08T11:00:00.000Z" },
+      task.id,
+      task.version,
+    );
+    expect(
+      (await service.list()).filter((r) => r.kind === "reminder"),
+    ).toHaveLength(1);
+    expect(
+      (await service.list()).find((r) => r.kind === "reminder")?.data.fireAt,
+    ).toBe("2026-11-08T10:45:00.000Z");
+    await service.save(
+      "task",
+      { ...task.data, reminderOffsetMinutes: undefined },
+      task.id,
+      task.version,
+    );
+    expect(
+      (await service.list()).find((r) => r.kind === "reminder")?.data.status,
+    ).toBe("cancelled");
+  });
   it("persists tasks across separate connections", async () => {
     const { service, path } = setup();
     const task = await service.save("task", { title: "Persistent study" });

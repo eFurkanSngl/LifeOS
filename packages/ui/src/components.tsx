@@ -442,7 +442,9 @@ export function RecordForm({
           ?.weekdays ?? []
       ).join(","),
     ),
-    [remind, setRemind] = useState(false),
+    [remind, setRemind] = useState(
+      record?.data.reminderOffsetMinutes !== undefined,
+    ),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
   const update = (key: string, value: unknown) =>
@@ -485,6 +487,11 @@ export function RecordForm({
           .map((s) => s.trim())
           .filter(Boolean);
       if (kind === "task") {
+        data.reminderOffsetMinutes = remind
+          ? Number(form.reminderOffsetMinutes ?? 0)
+          : undefined;
+        if (remind && !data.scheduledAt)
+          throw new Error(tr.reminderNeedsSchedule);
         data.recurrence = repeat
           ? {
               frequency: repeat,
@@ -514,26 +521,19 @@ export function RecordForm({
           record?.version,
         );
       if (
-        (kind === "task" && remind && data.scheduledAt) ||
         (kind === "contact" && data.followUp) ||
         (kind === "application" && data.followUp)
       ) {
-        const fireAt =
-          kind === "task"
-            ? String(data.scheduledAt)
-            : localInstant(
-                String(data.followUp) + "T09:00",
-                store.settings.timezone,
-              );
-        await store
-          .service()
-          .save("reminder", {
-            title: String(data.title),
-            fireAt,
-            taskId: kind === "task" ? saved.id : undefined,
-            contactId: kind === "contact" ? saved.id : undefined,
-            sound: store.settings.sound,
-          });
+        const fireAt = localInstant(
+          String(data.followUp) + "T09:00",
+          store.settings.timezone,
+        );
+        await store.service().save("reminder", {
+          title: String(data.title),
+          fireAt,
+          contactId: kind === "contact" ? saved.id : undefined,
+          sound: store.settings.sound,
+        });
       }
       await store.refresh();
       store.notify(tr.saved);
@@ -689,6 +689,20 @@ export function RecordForm({
                 onChange={(e) => setRemind(e.target.checked)}
               />
             </label>
+            {remind && (
+              <label>
+                {tr.reminderOffsetMinutes}
+                <input
+                  type="number"
+                  min={0}
+                  max={10080}
+                  value={String(form.reminderOffsetMinutes ?? 0)}
+                  onChange={(e) =>
+                    update("reminderOffsetMinutes", Number(e.target.value))
+                  }
+                />
+              </label>
+            )}
           </div>
         )}
         {error && (

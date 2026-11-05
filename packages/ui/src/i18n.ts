@@ -1,4 +1,6 @@
 export const tr = {
+  reminderOffsetMinutes: "Kaç dakika önce hatırlatılsın?",
+  reminderNeedsSchedule: "Hatırlatıcı için planlanan başlangıç gerekli.",
   draft: "taslak",
   unsavedDraft: "Taslak bu oturumda korunuyor…",
   saveDraftCopy: "Taslağı ayrı bir not olarak kaydet",

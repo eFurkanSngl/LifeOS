@@ -1,4 +1,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+mod recurrence;
 use chrono::{Timelike, Utc};
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
@@ -52,6 +53,10 @@ fn read_selected(db: &Connection, selection: u8) -> Result<Vec<Record>, String> 
         "SELECT id,kind,data,version,updated_at,deleted,cloud_version,dirty FROM records WHERE kind='reminder' AND deleted=0 AND json_extract(data,'$.status')='pending' AND json_extract(data,'$.fireAt')<=strftime('%Y-%m-%dT%H:%M:%fZ','now') AND NOT EXISTS(SELECT 1 FROM notification_events e WHERE e.reminder_id=records.id AND e.fire_at=json_extract(records.data,'$.fireAt')) LIMIT 25"
     } else if selection == 2 {
         "SELECT id,kind,data,version,updated_at,deleted,cloud_version,dirty FROM records WHERE kind='focus' AND deleted=0 AND json_extract(data,'$.status')='running'"
+    } else if selection == 3 {
+        "SELECT id,kind,data,version,updated_at,deleted,cloud_version,dirty FROM records WHERE kind='task' AND deleted=0 AND json_type(data,'$.recurrence')='object' AND json_extract(data,'$.status') NOT IN ('cancelled','completed')"
+    } else if selection == 4 {
+        "SELECT id,kind,data,version,updated_at,deleted,cloud_version,dirty FROM records WHERE kind='task' AND deleted=0 AND json_extract(data,'$.reminderOffsetMinutes') IS NOT NULL"
     } else {
         "SELECT id,kind,data,version,updated_at,deleted,cloud_version,dirty FROM records"
     };
@@ -120,7 +125,8 @@ fn put(db: &mut Connection, r: &Record, expected: i64) -> Result<(), String> {
 use rusqlite::OptionalExtension;
 #[tauri::command]
 fn list_records(state: tauri::State<Store>) -> Result<Vec<Record>, String> {
-    read_records(&state.db.lock().map_err(|_| "Database lock failed")?)
+    let db = state.db.lock().map_err(|_| "Database lock failed")?;
+    read_records(&db)
 }
 #[tauri::command]
 fn put_record(
@@ -129,11 +135,8 @@ fn put_record(
     record: Record,
     expected_version: i64,
 ) -> Result<(), String> {
-    put(
-        &mut state.db.lock().map_err(|_| "Database lock failed")?,
-        &record,
-        expected_version,
-    )?;
+    let mut db = state.db.lock().map_err(|_| "Database lock failed")?;
+    put(&mut db, &record, expected_version)?;
     let _ = app.emit("records-changed", ());
     Ok(())
 }
@@ -399,6 +402,46 @@ fn notification_action(
     let _ = app.emit("records-changed", ());
     Ok(())
 }
+fn hydrate_recurrence(app: &tauri::AppHandle) -> Result<(), String> {
+    let state = app.state::<Store>();
+    let mut db = state.db.lock().map_err(|_| "Database lock failed")?;
+    let now = Utc::now();
+    let mut changed = false;
+    for template in read_selected(&db, 3)? {
+        for child in recurrence::expand(&template, now)? {
+            let exists: bool = db
+                .query_row(
+                    "SELECT EXISTS(SELECT 1 FROM records WHERE id=?)",
+                    [&child.id],
+                    |row| row.get(0),
+                )
+                .map_err(|e| e.to_string())?;
+            if !exists {
+                put(&mut db, &child, 0)?;
+                changed = true;
+            }
+        }
+    }
+    for task in read_selected(&db, 4)? {
+        if let Some(reminder) = recurrence::reminder(&task, now) {
+            let exists: bool = db
+                .query_row(
+                    "SELECT EXISTS(SELECT 1 FROM records WHERE id=?)",
+                    [&reminder.id],
+                    |row| row.get(0),
+                )
+                .map_err(|e| e.to_string())?;
+            if !exists {
+                put(&mut db, &reminder, 0)?;
+                changed = true;
+            }
+        }
+    }
+    if changed {
+        let _ = app.emit("records-changed", ());
+    }
+    Ok(())
+}
 fn dispatch(app: &tauri::AppHandle) -> Result<(), String> {
     let state = app.state::<Store>();
     let mut db = state.db.lock().map_err(|_| "Database lock failed")?;
@@ -587,11 +630,21 @@ fn main() {
                 })
                 .build(app)?;
             let handle = app.handle().clone();
-            std::thread::spawn(move || loop {
-                if let Err(e) = dispatch(&handle) {
-                    eprintln!("LifeOS reminder dispatch failed: {}", e);
+            std::thread::spawn(move || {
+                let mut hydrated_hour = i64::MIN;
+                loop {
+                    let hour = Utc::now().timestamp() / 3600;
+                    if hour != hydrated_hour {
+                        match hydrate_recurrence(&handle) {
+                            Ok(()) => hydrated_hour = hour,
+                            Err(error) => eprintln!("LifeOS recurrence recovery failed: {}", error),
+                        }
+                    }
+                    if let Err(e) = dispatch(&handle) {
+                        eprintln!("LifeOS reminder dispatch failed: {}", e);
+                    }
+                    std::thread::sleep(Duration::from_secs(5));
                 }
-                std::thread::sleep(Duration::from_secs(5));
             });
             // MCP can change this database without frontend IPC. data_version gives cheap change detection.
             let handle = app.handle().clone();

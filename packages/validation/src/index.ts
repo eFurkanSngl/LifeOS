@@ -79,6 +79,7 @@ export const taskSchema = z
     duration: z.number().int().min(1).max(1440).default(30),
     completedAt: instant.optional(),
     recurrence: recurrenceSchema.optional(),
+    reminderOffsetMinutes: z.number().int().min(0).max(10080).optional(),
     seriesId: optionalId,
     occurrenceDate: dateOnly.optional(),
     tags: z.array(z.string().max(40)).max(30).default([]),

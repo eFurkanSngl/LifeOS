@@ -9,7 +9,7 @@ env:
   TURBO_TELEMETRY_DISABLED: "1"
 jobs:
   frontend:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -43,6 +43,13 @@ jobs:
           node-version: 24
           cache: pnpm
       - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            apps/desktop/src-tauri/target
+          key: windows-rust-${{ hashFiles('apps/desktop/src-tauri/Cargo.lock') }}
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @lifeos/desktop build
       - run: cargo check --manifest-path apps/desktop/src-tauri/Cargo.toml

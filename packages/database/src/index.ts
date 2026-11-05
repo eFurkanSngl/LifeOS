@@ -13,6 +13,7 @@ import {
   expandRecurrence,
   today,
   type TypedEntity,
+  taskReminderId,
 } from "@lifeos/core";
 
 export interface Repository {
@@ -132,6 +133,65 @@ export class LifeService {
       dirty: true,
     };
     await this.repo.put(record, expectedVersion ?? old?.version ?? 0);
+    if (kind === "task" && !parsed.recurrence) {
+      const reminderId = taskReminderId(id),
+        existing = records.find((r) => r.id === reminderId);
+      const enabled =
+        parsed.reminderOffsetMinutes !== undefined &&
+        typeof parsed.scheduledAt === "string" &&
+        !parsed.archived &&
+        !["completed", "skipped", "cancelled"].includes(String(parsed.status));
+      if (enabled) {
+        const moved =
+          old?.data.scheduledAt !== parsed.scheduledAt ||
+          old?.data.reminderOffsetMinutes !== parsed.reminderOffsetMinutes;
+        const reactivated =
+          old &&
+          ["completed", "skipped", "cancelled"].includes(
+            String(old.data.status),
+          );
+        const data = {
+          ...existing?.data,
+          title:
+            !existing || old?.data.title !== parsed.title
+              ? parsed.title
+              : existing.data.title,
+          taskId: id,
+          fireAt:
+            !existing || moved || reactivated
+              ? new Date(
+                  Date.parse(String(parsed.scheduledAt)) -
+                    Number(parsed.reminderOffsetMinutes) * 60000,
+                ).toISOString()
+              : existing.data.fireAt,
+          status:
+            !existing || moved || reactivated
+              ? "pending"
+              : existing.data.status,
+          sound: existing?.data.sound ?? false,
+        };
+        if (
+          !existing ||
+          existing.deleted ||
+          JSON.stringify(existing.data) !== JSON.stringify(data)
+        )
+          await this.save("reminder", data, reminderId, existing?.version ?? 0);
+      } else if (
+        existing &&
+        !existing.deleted &&
+        ["pending", "delivered"].includes(String(existing.data.status))
+      ) {
+        await this.save(
+          "reminder",
+          {
+            ...existing.data,
+            status: parsed.status === "completed" ? "completed" : "cancelled",
+          },
+          reminderId,
+          existing.version,
+        );
+      }
+    }
     if (
       kind === "task" &&
       parsed.recurrence &&
@@ -154,6 +214,7 @@ export class LifeService {
       for (const r of records.filter(
         (r) =>
           r.kind === "reminder" &&
+          r.id !== taskReminderId(id) &&
           !r.deleted &&
           r.data.taskId === id &&
           ["pending", "delivered"].includes(String(r.data.status)),

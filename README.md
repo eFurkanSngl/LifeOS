@@ -66,4 +66,4 @@ The first version deliberately uses versioned typed record envelopes instead of 
 - [Completed / pending delivery gates](docs/DELIVERY.md)
 - [Product scope and roadmap](docs/PRD.md), [ROADMAP](docs/ROADMAP.md)
 
-No code has been pushed or deployed by this build. No open-source license is granted; licensing remains undecided.
+Source is stored in the private GitHub repository https://github.com/eFurkanSngl/LifeOS. No production deployment has been performed. No open-source license is granted; licensing remains undecided.
