@@ -92,6 +92,17 @@ export class LifeService {
   ) {
     const records = await this.list(),
       old = records.find((r) => r.id === id);
+    const parsed = validateData(kind, data);
+    // Foreground and native/date-rollover expansion may create the same occurrence.
+    // Only this deterministic create is idempotent; ordinary edits keep CAS checks.
+    const sameOccurrence = (row: Entity | undefined) =>
+      kind === "task" &&
+      expectedVersion === 0 &&
+      parsed.seriesId &&
+      row?.kind === "task" &&
+      row.data.seriesId === parsed.seriesId &&
+      row.data.occurrenceDate === parsed.occurrenceDate;
+    if (sameOccurrence(old)) return old!;
     if (old && old.kind !== kind) throw new Error("Kayıt türü değiştirilemez.");
     if (
       expectedVersion !== undefined &&
@@ -100,7 +111,6 @@ export class LifeService {
       throw new Error(
         "Kayıt başka bir pencerede değişti. Yenileyip tekrar deneyin.",
       );
-    const parsed = validateData(kind, data);
     const references: Record<string, Kind> = {
       projectId: "project",
       taskId: "task",
@@ -132,7 +142,13 @@ export class LifeService {
       cloudVersion: old?.cloudVersion ?? 0,
       dirty: true,
     };
-    await this.repo.put(record, expectedVersion ?? old?.version ?? 0);
+    try {
+      await this.repo.put(record, expectedVersion ?? old?.version ?? 0);
+    } catch (error) {
+      const winner = (await this.list()).find((row) => row.id === id);
+      if (sameOccurrence(winner)) return winner!;
+      throw error;
+    }
     if (kind === "task" && !parsed.recurrence) {
       const reminderId = taskReminderId(id),
         existing = records.find((r) => r.id === reminderId);
