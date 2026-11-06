@@ -19,6 +19,7 @@
 | Alan              | İşlev                                                                                   |
 | ----------------- | --------------------------------------------------------------------------------------- |
 | Görev ve projeler | Öncelik, kategori, bağımsız tekrar kayıtları, kanban, kilometre taşları                 |
+| Eğitim            | Canlı ders / sınav / PDF filtreleri, tamamlanan/toplam ünite, kaynak bağlantıları, saat atanmayan sınav aralıkları |
 | Takvim            | Gün/hafta/ay; gün görünümünde 15 dakikalık sürükleme; Alt+yön tuşlarıyla taşıma         |
 | Hatırlatıcı       | Kalıcı kuyruk, ses, erteleme, yeniden planlama, sessiz saat ve gönderim geçmişi         |
 | Rutin             | Günlük, hafta içi, haftalık hedef ve frekansa uygun seri                                |
@@ -38,6 +39,8 @@ Anadolu eKampüs’te görünen beş ileri tarihli oturum kaynak başlangıç/bi
 
 ## Codex’ten not ve görev ekleme
 
+Görevler’de **Ders ekle**, **Sınav tarihi ekle**, **PDF takibi ekle** ve **Hatırlatıcı ekle** düğmeleri vardır. PDF ilerlemesi tamamlanan/toplam ünite olarak tutulur; +/− ile değiştirilir. Sınav aralıkları tüm gün kaydıdır: kişisel oturum saati bilinmeden saat üretilmez. Bağımsız uyarılar **Hatırlatıcılar** sayfasından düzenlenir.
+
 Yerel **MCP sunucusu** 12 sınırlı araç sunar. Bağlantı kurulduktan sonra istemciye “LifeOS’a bu görüşmenin notunu ekle” veya açık tarih/saatle görev oluşturma talebi verilebilir.
 
 1. LifeOS Ayarlar’dan yerel MCP erişimini etkinleştirip kaydet.
@@ -48,7 +51,7 @@ Web yayını ve ücretli API gerekmez. ChatGPT desteği kullanılan istemcinin y
 
 ## Doğrulama ve sınırlar
 
-**63 otomatik test, 16 tarayıcı akışı**, TypeScript, lint ve üretim derlemeleri geçti. Native kontrol/test/paket sonucu Actions’ta ayrıca izlenir. Önceki kurulu pakette gerçek bulut girişi, masaüstü→Supabase→masaüstü aktarımı, temiz yeniden başlatmada oturum/kayıt korunumu ve tek arka plan gönderimi doğrulandı. Kullanıcı bildirim ve sesin çalıştığını doğruladı.
+**66 otomatik test, 18 tarayıcı akışı**, TypeScript, lint ve üretim derlemeleri geçti. Native kontrol/test/paket sonucu Actions’ta ayrıca izlenir. Önceki kurulu pakette gerçek bulut girişi, masaüstü→Supabase→masaüstü aktarımı, temiz yeniden başlatmada oturum/kayıt korunumu ve tek arka plan gönderimi doğrulandı. Kullanıcı bildirim ve sesin çalıştığını doğruladı.
 
 Yeni global kısayol ve native form kapatma koruması dahil [canlı test listesi](docs/LIVE_TEST.md) henüz bütünüyle kapanmış değildir. Uyku/çökme/tepsi ve toast eylemlerinin tam matrisi açıktır. Ana JS yaklaşık 744 kB’den 615 kB’ye indi; bu RAM ölçümü değildir. **60–120 MiB bellek hedefi henüz sağlandı diye raporlanmıyor.**
 

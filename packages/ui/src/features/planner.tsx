@@ -119,21 +119,37 @@ export function Planner({ store, edit }: { store: LifeStore; edit: Edit }) {
       <div className={`planner ${view}`}>
         {days.map((day) => {
           const entries = tasks
-            .filter(
-              (t) =>
-                t.data.scheduledAt &&
-                today(store.settings.timezone, new Date(t.data.scheduledAt)) ===
-                  day,
+            .filter((t) =>
+              t.data.allDay
+                ? Boolean(
+                    t.data.dueDate &&
+                    t.data.dueDate <= day &&
+                    (t.data.endDate ?? t.data.dueDate) >= day,
+                  )
+                : Boolean(
+                    t.data.scheduledAt &&
+                    today(
+                      store.settings.timezone,
+                      new Date(t.data.scheduledAt),
+                    ) === day,
+                  ),
             )
-            .sort((a, b) =>
-              String(a.data.scheduledAt).localeCompare(
-                String(b.data.scheduledAt),
-              ),
+            .sort(
+              (a, b) =>
+                Number(b.data.allDay) - Number(a.data.allDay) ||
+                String(a.data.scheduledAt).localeCompare(
+                  String(b.data.scheduledAt),
+                ),
             );
+          const allDayEntries = entries.filter((t) => t.data.allDay);
+          const timeOffset = 78 + allDayEntries.length * 90;
           return (
             <div
               className={`planner-day ${day === today(store.settings.timezone) ? "is-today" : ""}`}
               key={day}
+              style={
+                view === "day" ? { minHeight: timeOffset + 1162 } : undefined
+              }
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => {
                 e.preventDefault();
@@ -174,7 +190,7 @@ export function Planner({ store, edit }: { store: LifeStore; edit: Edit }) {
                 </div>
               )}
               {view === "day" && (
-                <div className="time-drop-grid">
+                <div className="time-drop-grid" style={{ top: timeOffset }}>
                   {Array.from({ length: 24 }, (_, hour) => (
                     <button
                       type="button"
@@ -218,42 +234,56 @@ export function Planner({ store, edit }: { store: LifeStore; edit: Edit }) {
               )}
               {entries.map((t) => (
                 <button
-                  draggable
+                  draggable={!t.data.allDay}
                   onDragStart={(e) =>
                     e.dataTransfer.setData("text/plain", t.id)
                   }
                   onClick={() => edit("task", t)}
                   key={t.id}
                   style={
-                    view === "day"
+                    view === "day" && t.data.allDay
                       ? {
                           position: "absolute",
-                          left: 76,
-                          right: 14,
+                          left: 10,
+                          right: 10,
                           top:
-                            78 +
-                            (Number(
-                              formatTime(
-                                t.data.scheduledAt!,
-                                store.settings.timezone,
-                              ).slice(0, 2),
-                            ) *
-                              60 +
-                              Number(
+                            45 +
+                            allDayEntries.findIndex((x) => x.id === t.id) * 90,
+                          height: 80,
+                          width: "auto",
+                          zIndex: 3,
+                          overflow: "auto",
+                        }
+                      : view === "day"
+                        ? {
+                            position: "absolute",
+                            left: 76,
+                            right: 14,
+                            top:
+                              timeOffset +
+                              (Number(
                                 formatTime(
                                   t.data.scheduledAt!,
                                   store.settings.timezone,
-                                ).slice(3),
-                              )) *
-                              0.8,
-                          minHeight: t.data.duration * 0.8,
-                          width: "auto",
-                          zIndex: 2,
-                        }
-                      : undefined
+                                ).slice(0, 2),
+                              ) *
+                                60 +
+                                Number(
+                                  formatTime(
+                                    t.data.scheduledAt!,
+                                    store.settings.timezone,
+                                  ).slice(3),
+                                )) *
+                                0.8,
+                            minHeight: t.data.duration * 0.8,
+                            width: "auto",
+                            zIndex: 2,
+                          }
+                        : undefined
                   }
                   className={`schedule-block ${t.data.status === "completed" ? "is-done" : ""}`}
                   onKeyDown={(e) => {
+                    if (t.data.allDay) return;
                     if (
                       !e.altKey ||
                       ![
@@ -284,8 +314,9 @@ export function Planner({ store, edit }: { store: LifeStore; edit: Edit }) {
                   }}
                 >
                   <small>
-                    {formatTime(t.data.scheduledAt!, store.settings.timezone)} ·{" "}
-                    {t.data.duration} dk
+                    {t.data.allDay
+                      ? label(t.data.taskKind)
+                      : `${formatTime(t.data.scheduledAt!, store.settings.timezone)} · ${t.data.duration} dk`}
                   </small>
                   <strong>{t.data.title}</strong>
                   <span>{t.data.category}</span>
@@ -299,9 +330,9 @@ export function Planner({ store, edit }: { store: LifeStore; edit: Edit }) {
         })}
       </div>
       <Section title={tr.unscheduled}>
-        {tasks.filter((t) => !t.data.scheduledAt).length ? (
+        {tasks.filter((t) => !t.data.scheduledAt && !t.data.allDay).length ? (
           tasks
-            .filter((t) => !t.data.scheduledAt)
+            .filter((t) => !t.data.scheduledAt && !t.data.allDay)
             .map((t) => (
               <div
                 draggable

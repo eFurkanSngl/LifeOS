@@ -63,6 +63,83 @@ test.beforeEach(async ({ page }) => {
     page.getByRole("button", { name: "İlk görevini ekle" }),
   ).toBeVisible();
 });
+test("tracks PDF units and filters education records", async ({ page }) => {
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: "Görevler" })
+    .click();
+  await page
+    .getByRole("button", { name: "PDF takibi ekle", exact: true })
+    .click();
+  await page.getByLabel("Başlık *").fill("PDF unit tracking");
+  await page.getByLabel("Toplam ünite", { exact: true }).fill("8");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Kaydet", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  await page
+    .getByRole("button", { name: "Bir ünite tamamla", exact: true })
+    .click();
+  await expect(page.getByText("1/8 ünite", { exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.getByText("1/8 ünite", { exact: true })).toBeVisible();
+  await page.getByLabel("Kayıt türüne göre filtrele").selectOption("general");
+  await expect(
+    page.getByText("PDF unit tracking", { exact: true }),
+  ).not.toBeVisible();
+  await page.getByLabel("Kayıt türüne göre filtrele").selectOption("pdf");
+  await page
+    .getByRole("button", { name: "Bir ünite geri al", exact: true })
+    .click();
+  await expect(page.getByText("0/8 ünite", { exact: true })).toBeVisible();
+});
+test("shows an exam on both dates without assigning an invented time and creates independent reminders", async ({
+  page,
+}) => {
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: "Görevler" })
+    .click();
+  await page
+    .getByRole("button", { name: "Sınav tarihi ekle", exact: true })
+    .click();
+  await page.getByLabel("Başlık *").fill("All-day exam period");
+  await page.getByLabel("Başlangıç", { exact: true }).fill("2026-12-05");
+  await page.getByLabel("Bitiş günü", { exact: true }).fill("2026-12-06");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Kaydet", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: "Planlayıcı", exact: true })
+    .click();
+  await page.getByLabel("Tarih", { exact: true }).fill("2026-12-05");
+  await expect(
+    page.locator(".schedule-block").filter({ hasText: "All-day exam period" }),
+  ).toHaveCount(2);
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: "Hatırlatıcılar", exact: true })
+    .click();
+  await page
+    .getByRole("main")
+    .getByRole("button", { name: "Yeni ekle", exact: true })
+    .first()
+    .click();
+  await page.getByLabel("Başlık *").fill("Independent reminder");
+  await page.getByLabel("Hatırlatma zamanı *").fill("2026-12-04T18:00");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Kaydet", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  await expect(
+    page.getByText("Independent reminder", { exact: true }),
+  ).toBeVisible();
+});
 test("moves a calendar task to a quarter-hour slot and persists it", async ({
   page,
 }) => {

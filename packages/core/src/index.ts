@@ -73,6 +73,29 @@ export function overlaps(a: Task, b: Task) {
     y = Date.parse(b.scheduledAt);
   return x < y + b.duration * 60000 && y < x + a.duration * 60000;
 }
+export function studyProgress(
+  task: Task,
+  delta: number,
+  now = new Date().toISOString(),
+): Task {
+  if (task.taskKind !== "pdf" || !task.totalUnits)
+    throw new Error("Ünite toplamı gerekli.");
+  const completedUnits = Math.max(
+    0,
+    Math.min(task.totalUnits, (task.completedUnits ?? 0) + delta),
+  );
+  return {
+    ...task,
+    completedUnits,
+    status:
+      completedUnits === task.totalUnits
+        ? "completed"
+        : completedUnits
+          ? "in_progress"
+          : "inbox",
+    completedAt: completedUnits === task.totalUnits ? now : undefined,
+  };
+}
 // Weekly goals aggregate units across an ISO week; weekdays never break on weekends.
 export function habitProgress(
   logs: { date: string; count: number }[],

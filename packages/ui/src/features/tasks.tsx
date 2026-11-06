@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { entities, today, type TypedEntity } from "@lifeos/core";
+import { entities, today, studyProgress, type TypedEntity } from "@lifeos/core";
 import { tr, label } from "../i18n";
 import {
   Section,
@@ -7,6 +7,7 @@ import {
   TaskRow,
   EditButton,
   DeleteButton,
+  ExternalLink,
 } from "../components";
 import type { LifeStore } from "../store";
 import type { Edit } from "./types";
@@ -22,11 +23,13 @@ export function TaskList({
   projectId?: string;
 }) {
   const [status, setStatus] = useState("all"),
+    [taskKind, setTaskKind] = useState("all"),
     [group, setGroup] = useState("none"),
     [selected, setSelected] = useState<Set<string>>(new Set()),
     [archived, setArchived] = useState(false);
   const all = entities(store.records, "task").filter(
     (t) =>
+      (taskKind === "all" || t.data.taskKind === taskKind) &&
       (!projectId || t.data.projectId === projectId) &&
       !t.data.recurrence &&
       t.data.archived === archived &&
@@ -59,25 +62,34 @@ export function TaskList({
       for (const t of all.filter((t) =>
         archive ? t.data.status === "completed" : selected.has(t.id),
       ))
-        await store
-          .service()
-          .save(
-            "task",
-            {
-              ...t.data,
-              archived: archive || t.data.archived,
-              status: archive ? t.data.status : "completed",
-              completedAt: t.data.completedAt ?? new Date().toISOString(),
-            },
-            t.id,
-            t.version,
-          );
+        await store.service().save(
+          "task",
+          {
+            ...t.data,
+            archived: archive || t.data.archived,
+            status: archive ? t.data.status : "completed",
+            completedAt: t.data.completedAt ?? new Date().toISOString(),
+          },
+          t.id,
+          t.version,
+        );
     });
     setSelected(new Set());
   };
   return (
     <>
       <div className="toolbar">
+        <select
+          aria-label={tr.taskKindFilter}
+          value={taskKind}
+          onChange={(e) => setTaskKind(e.target.value)}
+        >
+          {["all", "general", "lesson", "exam", "pdf"].map((kind) => (
+            <option key={kind} value={kind}>
+              {label(kind)}
+            </option>
+          ))}
+        </select>
         <div className="filter-tabs">
           {["all", "inbox", "planned", "in_progress", "completed"].map((s) => (
             <button
@@ -108,6 +120,45 @@ export function TaskList({
         </button>
       </div>
       <div className="toolbar">
+        <button
+          className="text-button"
+          onClick={() =>
+            edit("task", undefined, {
+              taskKind: "lesson",
+              category: "Eğitim",
+              reminderOffsetMinutes: 30,
+            })
+          }
+        >
+          {tr.newLesson}
+        </button>
+        <button
+          className="text-button"
+          onClick={() =>
+            edit("task", undefined, {
+              taskKind: "exam",
+              category: "Sınav",
+              allDay: true,
+            })
+          }
+        >
+          {tr.newExam}
+        </button>
+        <button
+          className="text-button"
+          onClick={() =>
+            edit("task", undefined, {
+              taskKind: "pdf",
+              category: "PDF",
+              completedUnits: 0,
+            })
+          }
+        >
+          {tr.newPdf}
+        </button>
+        <button className="text-button" onClick={() => edit("reminder")}>
+          {tr.newReminder}
+        </button>
         <button className="text-button" onClick={() => void bulk(true)}>
           {tr.archiveDone}
         </button>
@@ -142,6 +193,51 @@ export function TaskList({
                         })
                       }
                     />
+                    {t.data.taskKind === "pdf" && t.data.totalUnits && (
+                      <div className="study-progress">
+                        <span>
+                          {t.data.completedUnits ?? 0}/{t.data.totalUnits}{" "}
+                          {tr.studyUnit}
+                        </span>
+                        <progress
+                          aria-label={`${t.data.title} ${tr.completedUnits}`}
+                          max={t.data.totalUnits}
+                          value={t.data.completedUnits ?? 0}
+                        />
+                        <button
+                          className="icon-button"
+                          aria-label={tr.unitUndo}
+                          disabled={!(t.data.completedUnits ?? 0)}
+                          onClick={() =>
+                            void store.save(
+                              "task",
+                              studyProgress(t.data, -1),
+                              t.id,
+                              t.version,
+                            )
+                          }
+                        >
+                          −
+                        </button>
+                        <button
+                          className="icon-button"
+                          aria-label={tr.unitCompleted}
+                          disabled={
+                            (t.data.completedUnits ?? 0) >= t.data.totalUnits
+                          }
+                          onClick={() =>
+                            void store.save(
+                              "task",
+                              studyProgress(t.data, 1),
+                              t.id,
+                              t.version,
+                            )
+                          }
+                        >
+                          +
+                        </button>
+                      </div>
+                    )}
                     {archived && (
                       <button
                         className="text-button"
@@ -158,6 +254,11 @@ export function TaskList({
                       </button>
                     )}
                     <DeleteButton record={t} store={store} />
+                    {t.data.resourceUrl && (
+                      <ExternalLink url={t.data.resourceUrl}>
+                        {tr.resourceUrl}
+                      </ExternalLink>
+                    )}
                   </div>
                 ))}
               </div>

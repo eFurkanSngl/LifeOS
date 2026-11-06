@@ -2531,3 +2531,30 @@ main {
   right: 10px;
   margin-top: 0;
 }
+.task-with-delete {
+  flex-wrap: wrap;
+}
+.study-progress {
+  order: 2;
+  flex-basis: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 48px 12px;
+}
+.study-progress progress {
+  flex: 1;
+  min-width: 70px;
+  accent-color: #315ceb;
+  height: 8px;
+}
+.study-progress span {
+  color: #a6b0c3;
+  font-size: 12px;
+}
+@media (max-width: 600px) {
+  .study-progress {
+    padding-left: 12px;
+    gap: 6px;
+  }
+}

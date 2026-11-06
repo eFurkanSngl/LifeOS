@@ -193,7 +193,7 @@ export function TaskRow({
     done = t.status === "completed",
     overdue =
       t.dueDate &&
-      t.dueDate <
+      (t.endDate ?? t.dueDate) <
         new Intl.DateTimeFormat("en-CA", {
           timeZone: store.settings.timezone,
         }).format(new Date()) &&
@@ -229,11 +229,19 @@ export function TaskRow({
       <button className="task-main" onClick={onEdit}>
         <span>{t.title}</span>
         <small>
-          {t.category}
+          {label(t.taskKind)} · {t.category}
+          {t.allDay && (
+            <>
+              {" "}
+              · {t.dueDate}
+              {t.endDate && t.endDate !== t.dueDate ? ` – ${t.endDate}` : ""}
+            </>
+          )}
           {t.scheduledAt && (
             <> · {formatTime(t.scheduledAt, store.settings.timezone)}</>
           )}{" "}
-          · {t.duration} dk{overdue && <em>{tr.overdue}</em>}
+          {!t.allDay && <> · {t.duration} dk</>}
+          {overdue && <em>{tr.overdue}</em>}
         </small>
       </button>
       {t.priority !== "normal" && (
@@ -255,7 +263,10 @@ type Field = {
 const fields: Partial<Record<Kind, Field[]>> = {
   task: [
     { key: "title", required: true },
+    { key: "taskKind", options: ["general", "lesson", "exam", "pdf"] },
+    { key: "courseCode" },
     { key: "description", type: "textarea" },
+    { key: "resourceUrl", type: "url" },
     { key: "category" },
     { key: "projectId", type: "project" },
     { key: "priority", options: ["low", "normal", "high", "critical"] },
@@ -271,7 +282,11 @@ const fields: Partial<Record<Kind, Field[]>> = {
       ],
     },
     { key: "scheduledAt", type: "datetime-local" },
+    { key: "allDay", type: "checkbox" },
     { key: "dueDate", type: "date" },
+    { key: "endDate", type: "date" },
+    { key: "totalUnits", type: "number" },
+    { key: "completedUnits", type: "number" },
     { key: "duration", type: "number" },
     {
       key: "type",
@@ -446,7 +461,8 @@ export function RecordForm({
       ).join(","),
     ),
     [remind, setRemind] = useState(
-      record?.data.reminderOffsetMinutes !== undefined,
+      (record?.data.reminderOffsetMinutes ?? initial?.reminderOffsetMinutes) !==
+        undefined,
     ),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
@@ -543,6 +559,20 @@ export function RecordForm({
           .map((s) => s.trim())
           .filter(Boolean);
       if (kind === "task") {
+        if (data.allDay) {
+          delete data.scheduledAt;
+          if (
+            !data.dueDate ||
+            (data.endDate && String(data.endDate) < String(data.dueDate))
+          )
+            throw new Error(tr.invalidDateRange);
+        }
+        if (
+          data.taskKind === "pdf" &&
+          (!data.totalUnits ||
+            Number(data.completedUnits ?? 0) > Number(data.totalUnits))
+        )
+          throw new Error(tr.invalidStudyProgress);
         data.reminderOffsetMinutes = remind
           ? Number(form.reminderOffsetMinutes ?? 0)
           : undefined;
@@ -607,83 +637,98 @@ export function RecordForm({
     >
       <form onSubmit={(e) => void submit(e)} className="record-form">
         <div className="form-grid">
-          {(fields[kind] ?? []).map((f) => {
-            const id = `field-${f.key}`,
-              value = form[f.key];
-            const choices = [
-              "project",
-              "task",
-              "habit",
-              "contact",
-              "milestone",
-            ].includes(f.type ?? "")
-              ? entities(store.records, f.type as Kind)
-              : undefined;
-            return (
-              <label
-                key={f.key}
-                htmlFor={id}
-                className={`${f.type === "textarea" || f.key === "title" ? "span-2" : ""} ${f.type === "checkbox" ? "checkbox-label" : ""}`}
-              >
-                <span>
-                  {label(f.key)}
-                  {f.required ? " *" : ""}
-                </span>
-                {choices ? (
-                  <select
-                    aria-label={label(f.key)}
-                    id={id}
-                    required={f.required}
-                    value={String(value ?? "")}
-                    onChange={(e) => update(f.key, e.target.value)}
-                  >
-                    <option value="">—</option>
-                    {choices.map((r) => (
-                      <option key={r.id} value={r.id}>
-                        {String("title" in r.data ? r.data.title : r.id)}
-                      </option>
-                    ))}
-                  </select>
-                ) : f.options ? (
-                  <select
-                    aria-label={label(f.key)}
-                    id={id}
-                    value={String(value ?? f.options[0])}
-                    onChange={(e) => update(f.key, e.target.value)}
-                  >
-                    {f.options.map((o) => (
-                      <option key={o} value={o}>
-                        {o ? label(o) : "—"}
-                      </option>
-                    ))}
-                  </select>
-                ) : f.type === "textarea" ? (
-                  <textarea
-                    id={id}
-                    rows={3}
-                    value={String(value ?? "")}
-                    onChange={(e) => update(f.key, e.target.value)}
-                  />
-                ) : f.type === "checkbox" ? (
-                  <input
-                    id={id}
-                    type="checkbox"
-                    checked={Boolean(value)}
-                    onChange={(e) => update(f.key, e.target.checked)}
-                  />
-                ) : (
-                  <input
-                    id={id}
-                    autoFocus={f.key === "title"}
-                    required={f.required}
-                    type={f.type ?? "text"}
-                    value={String(value ?? "")}
-                    onChange={(e) => update(f.key, e.target.value)}
-                  />
-                )}
-              </label>
-            );
-          })}
+          {(fields[kind] ?? [])
+            .filter(
+              (f) =>
+                kind !== "task" ||
+                ((!["totalUnits", "completedUnits"].includes(f.key) ||
+                  form.taskKind === "pdf") &&
+                  (f.key !== "endDate" || form.allDay === true) &&
+                  (!["scheduledAt", "duration"].includes(f.key) ||
+                    form.allDay !== true) &&
+                  (!["type", "severity", "milestoneId"].includes(f.key) ||
+                    !form.taskKind ||
+                    form.taskKind === "general")),
+            )
+            .map((f) => {
+              const id = `field-${f.key}`,
+                value = form[f.key];
+              const choices = [
+                "project",
+                "task",
+                "habit",
+                "contact",
+                "milestone",
+              ].includes(f.type ?? "")
+                ? entities(store.records, f.type as Kind)
+                : undefined;
+              return (
+                <label
+                  key={f.key}
+                  htmlFor={id}
+                  className={`${f.type === "textarea" || f.key === "title" ? "span-2" : ""} ${f.type === "checkbox" ? "checkbox-label" : ""}`}
+                >
+                  <span>
+                    {kind === "task" && form.allDay && f.key === "dueDate"
+                      ? tr.startDate
+                      : label(f.key)}
+                    {f.required ? " *" : ""}
+                  </span>
+                  {choices ? (
+                    <select
+                      aria-label={label(f.key)}
+                      id={id}
+                      required={f.required}
+                      value={String(value ?? "")}
+                      onChange={(e) => update(f.key, e.target.value)}
+                    >
+                      <option value="">—</option>
+                      {choices.map((r) => (
+                        <option key={r.id} value={r.id}>
+                          {String("title" in r.data ? r.data.title : r.id)}
+                        </option>
+                      ))}
+                    </select>
+                  ) : f.options ? (
+                    <select
+                      aria-label={label(f.key)}
+                      id={id}
+                      value={String(value ?? f.options[0])}
+                      onChange={(e) => update(f.key, e.target.value)}
+                    >
+                      {f.options.map((o) => (
+                        <option key={o} value={o}>
+                          {o ? label(o) : "—"}
+                        </option>
+                      ))}
+                    </select>
+                  ) : f.type === "textarea" ? (
+                    <textarea
+                      id={id}
+                      rows={3}
+                      value={String(value ?? "")}
+                      onChange={(e) => update(f.key, e.target.value)}
+                    />
+                  ) : f.type === "checkbox" ? (
+                    <input
+                      id={id}
+                      type="checkbox"
+                      checked={Boolean(value)}
+                      onChange={(e) => update(f.key, e.target.checked)}
+                    />
+                  ) : (
+                    <input
+                      id={id}
+                      autoFocus={f.key === "title"}
+                      required={f.required}
+                      type={f.type ?? "text"}
+                      value={String(value ?? "")}
+                      onChange={(e) => update(f.key, e.target.value)}
+                    />
+                  )}
+                </label>
+              );
+            })}
         </div>
         {kind === "task" && (
           <div className="recurrence-fields">

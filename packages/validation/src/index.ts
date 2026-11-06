@@ -62,6 +62,13 @@ export const taskSchema = z
     title,
     description: text,
     category: z.string().max(80).default("Kişisel"),
+    taskKind: z.enum(["general", "lesson", "exam", "pdf"]).default("general"),
+    courseCode: z.string().trim().max(40).optional(),
+    resourceUrl: safeUrl.optional(),
+    allDay: z.boolean().default(false),
+    endDate: dateOnly.optional(),
+    totalUnits: z.number().int().min(1).max(1000).optional(),
+    completedUnits: z.number().int().min(0).max(1000).optional(),
     projectId: optionalId,
     priority: z.enum(["low", "normal", "high", "critical"]).default("normal"),
     status: z
@@ -91,7 +98,33 @@ export const taskSchema = z
     milestoneId: optionalId,
     archived: z.boolean().default(false),
   })
-  .strict();
+  .strict()
+  .superRefine((value, ctx) => {
+    if (
+      value.allDay &&
+      (!value.dueDate || (value.endDate && value.endDate < value.dueDate))
+    )
+      ctx.addIssue({
+        code: "custom",
+        path: ["dueDate"],
+        message: "Geçerli başlangıç/bitiş günü gerekli.",
+      });
+    if (value.allDay && value.scheduledAt)
+      ctx.addIssue({
+        code: "custom",
+        path: ["scheduledAt"],
+        message: "Tüm gün kaydına oturum saati eklenemez.",
+      });
+    if (
+      value.taskKind === "pdf" &&
+      (!value.totalUnits || (value.completedUnits ?? 0) > value.totalUnits)
+    )
+      ctx.addIssue({
+        code: "custom",
+        path: ["totalUnits"],
+        message: "Geçerli tamamlanan/toplam ünite gerekli.",
+      });
+  });
 export type Task = z.infer<typeof taskSchema>;
 // Zod 4 applies inner defaults even through optional wrappers. Sparse patches
 // must remove those defaults so a title edit cannot reset status or priority.

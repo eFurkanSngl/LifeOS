@@ -63,6 +63,7 @@ const nav = [
   ["dashboard", LayoutDashboard],
   ["planner", CalendarDays],
   ["tasks", CheckSquare2],
+  ["reminderList", Bell],
   ["projects", Layers3],
   ["career", BriefcaseBusiness],
   ["habits", Repeat2],
@@ -194,17 +195,19 @@ export function LifeOS({
       ),
     sessions = entities(store.records, "codex");
   const currentKind: Kind =
-    page === "projects"
-      ? "project"
-      : page === "career"
-        ? "contact"
-        : page === "habits"
-          ? "habit"
-          : page === "ideas"
-            ? "note"
-            : page === "integrations"
-              ? "shortcut"
-              : "task";
+    page === "reminderList"
+      ? "reminder"
+      : page === "projects"
+        ? "project"
+        : page === "career"
+          ? "contact"
+          : page === "habits"
+            ? "habit"
+            : page === "ideas"
+              ? "note"
+              : page === "integrations"
+                ? "shortcut"
+                : "task";
   if (!store.ready)
     return (
       <div className="loading-screen">
@@ -442,6 +445,18 @@ export function LifeOS({
                   <TaskList store={store} edit={edit} search={search} />
                 ) : page === "planner" ? (
                   <Planner store={store} edit={edit} />
+                ) : page === "reminderList" ? (
+                  <>
+                    <div className="toolbar">
+                      <button
+                        className="button secondary"
+                        onClick={() => setHistory(!history)}
+                      >
+                        {history ? tr.reminders : tr.notificationHistory}
+                      </button>
+                    </div>
+                    <Reminders store={store} edit={edit} history={history} />
+                  </>
                 ) : page === "projects" ? (
                   <Projects store={store} edit={edit} search={search} />
                 ) : page === "habits" ? (
