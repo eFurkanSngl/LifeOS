@@ -30,4 +30,6 @@ A clearly marked QA note, `[Doğrulama] LifeOS bulut bağlantısı`, was capture
 
 ## Remaining acceptance
 
-Verify separate web/desktop clients, offline edits, conflicts, sign-out, restart persistence, session expiry/rotation and credential storage. Public signup remains disabled. SMTP-dependent recovery/email-change flows and CLI migration-history registration remain open.
+A clean native process restart restored the signed-in session without password entry, preserved the QA note, and completed sync at 19:31:54 Europe/Istanbul. No credential contents were inspected. See NATIVE_VERIFICATION.md.
+
+Verify separate web/desktop clients, offline edits, conflicts, sign-out, session expiry/rotation and storage failure recovery. Public signup remains disabled. SMTP-dependent recovery/email-change flows and CLI migration-history registration remain open.

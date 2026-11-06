@@ -36,3 +36,11 @@ Follow REMINDER_ENGINE.md for visible banners, sound and toast actions, quiet ho
 ## Configured cloud build update
 
 Source `3f2648d`, workflow https://github.com/eFurkanSngl/LifeOS/actions/runs/42230877395: frontend and Windows native jobs both passed, including 58 Vitest tests, 13 browser tests, six Rust tests and NSIS packaging. The new installer updated `.tools/native-run` with exit 0 after the owner closed the previous app. The configured app reopened, the owner signed in themselves, and a real native-to-Supabase-to-native QA note roundtrip passed. See CLOUD_VERIFICATION.md for the exact boundary. Session restart/rotation and the reminder matrix remain open.
+
+## Installed scheduler and restart probe, 6 November 2026
+
+Computer Use exercised the installed `3f2648d` app. Settings accepted a test notification request. A separate reminder, `[Doğrulama] Zamanlı Windows bildirimi`, was saved for 19:31 Europe/Istanbul with sound enabled and no linked task/habit/contact. LifeOS was put behind another foreground app using Alt+Tab (not minimized or hidden to tray). After the due time, the refreshed persistent notification history showed exactly one `Gönderim istendi` entry at 19:31:01. This confirms native background scheduling and accepted OS submission, not visible banner/sound delivery. The owner was asked to report banner/sound; no result was available at this checkpoint.
+
+LifeOS was then closed normally with close-to-tray disabled and relaunched from the same installation. The QA note and the single original dispatch row survived. No second dispatch row appeared after restart. Settings restored the signed-in session without password entry and showed a successful new sync at 19:31:54. This passes one clean process-restart persistence/duplicate-suppression check and real session restoration. It does not cover crash recovery, overdue startup recovery, sleep, expiry or token rotation. No credentials or token contents were inspected. The existing startup checkbox was already enabled by the owner and was not changed during this probe.
+
+Remaining visible-delivery and lifecycle gates: banner/sound confirmation, toast actions, snooze/reschedule, minimized/tray states, missed-due startup, sleep/resume, quiet hours/timezone, focus completion and crash-window recovery. The QA reminder and note remain as evidence; no user data was deleted.
