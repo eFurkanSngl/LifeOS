@@ -4,7 +4,7 @@ Web ve iki istemci testi ertelendi. Yeni native pakette aşağıdaki testleri s�
 
 ## 1. Hatırlatıcılar
 
-- [ ] Rahatsız etmeyin kapalı: Ayarlar testinde banner ve ses var.
+- [x] Rahatsız etmeyin kapalı: Ayarlar testinde banner ve ses var (kullanıcı doğruladı).
 - [ ] İki dakika ileriye sesli test hatırlatıcısı kur, küçült: tek banner ve tek geçmiş kaydı var.
 - [ ] Ayrı testlerde banner düğmeleri Ertele, Yeniden planla, Tamamla çalışıyor. Banner kaybolduktan sonraki Bildirim Merkezi eylemleri garanti edilmiyor.
 - [ ] Uygulama içi ertele/yeniden planla: yeni saatte tek uyarı var.
@@ -32,8 +32,8 @@ Web ve iki istemci testi ertelendi. Yeni native pakette aşağıdaki testleri s�
 
 ## 5. Özellikler ve dersler
 
-- [ ] Başka uygulamada Ctrl+Shift+A hızlı formu açıyor; dolu taslağı değiştirmiyor.
-- [ ] Dolu formda Escape/Vazgeç/pencere kapatma uyarıyor; Düzenlemeye devam et taslağı koruyor.
+- [x] Başka uygulamada Ctrl+Shift+A hızlı formu açıyor (Windows Ayarlar üzerinden gözlendi); dolu taslağı koruma otomatik testte geçti.
+- [x] Dolu formda Escape/Vazgeç otomatik testi ve gerçek pencere X düğmesi testi geçti; Düzenlemeye devam et taslağı korudu.
 - [ ] Markdown önizleme, hafta içi/haftalık hedefler ve özel odak süreleri çalışıyor.
 - [ ] Sağ panel kenarı fare/klavyeyle değişiyor, yeniden açınca genişlik korunuyor.
 - [ ] Takvim gün görünümünde 15 dakikalık sürükleme ve Alt+yön tuşlarıyla taşıma çalışıyor.

@@ -8,6 +8,19 @@ Measure the installed package after warm-up, with the same records and visible p
 
 Latest installed measurement is recorded below once available.
 
+## Installed b64b3c0 samples, 6 November, Europe/Istanbul
+
+Same five lesson tasks and planner page; LifeOS plus six descendant WebView processes, measured with tools/measure-desktop.ps1 over 30.12 seconds. These are single samples, not a sustained benchmark.
+
+| State                             | Summed working set MiB | Summed private bytes MiB | CPU % of one core |
+| --------------------------------- | ---------------------: | -----------------------: | ----------------: |
+| Previous cd04e8a planner baseline |                 450.90 |                   338.88 |             0.000 |
+| New planner, early post-launch    |                 417.95 |                   292.20 |             6.639 |
+| New planner, warmed               |                 414.15 |                   306.80 |             3.321 |
+| New app behind Windows Settings   |                  53.55 |                   225.03 |             0.000 |
+
+Process identities did not change during each interval. Background memory reduction is observable, but the foreground 60–120 MiB working-set goal remains unmet. Private committed memory is not resident working set; the background result must not be described as a 54 MiB total allocation or a universal idle-memory guarantee. Startup and prior usage differ between baseline and new samples, so the foreground difference alone is not a controlled speed/memory benchmark. The early CPU sample includes initial activity; no sustained idle-CPU improvement is claimed.
+
 With five real lesson tasks and their alarms in the previous cd04e8a package, the foreground planner baseline summed 451.09 MiB working set and 337.81 MiB private bytes over LifeOS plus six profile-matched WebView processes. This is a different workload from the initial empty-app sample.
 
 The follow-up Windows patch requests WebView2's LOW memory target when the app loses focus and restores NORMAL on focus. It uses the optional ICoreWebView2_19 interface and silently keeps the runtime default if unsupported. It does not suspend the native queue or modify browser security switches. The declared Tauri minor is pinned to match the platform-handle interface. The new installed measurement must be recorded before asserting a benefit.

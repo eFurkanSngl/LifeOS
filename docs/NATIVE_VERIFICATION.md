@@ -1,5 +1,17 @@
 # Windows verification checkpoint — 6 November 2026
 
+## Final installed source for live acceptance
+
+Source **77aaa64**, https://github.com/eFurkanSngl/LifeOS/actions/runs/42282980433: frontend 63 tests/16 browser flows and Windows cargo check/six Rust tests/NSIS packaging all passed. The installer SHA256 is `0950A49A3BC1A394762137A07986DEFC86A7EDAFD5F4C951DB25ECB242247819`. Installation into the existing `.tools/native-run` completed with exit 0; installed executable length is 9,630,208 bytes. The actual app reopened, Ctrl+Shift+A opened a form with an empty title, and the untouched form dismissed without a draft warning. The planner was set to 7–13 November and displayed all five real course sessions. The preceding native shortcut/close-guard checks remain applicable; their Rust code is unchanged in this package. The app is left open on that planner for the owner's acceptance tests.
+
+Memory sampling of the same native memory policy in b64b3c0 measured 414.15 MiB foreground working set and 53.55 MiB background working set across seven processes; background private bytes were 225.03 MiB. These are bounded samples, not a universal allocation or performance guarantee. Foreground memory target remains open; see PERFORMANCE.md. Web deployment/two-client acceptance remain deferred. User-only sleep/tray/toast-action/recovery checks are listed in LIVE_TEST.md rather than claimed passed.
+
+## Installed desktop feature checks
+
+Source b2868c1 passed both CI jobs at https://github.com/eFurkanSngl/LifeOS/actions/runs/42278114563 and was installed with exit 0. From the Windows Settings foreground window, Ctrl+Shift+A brought LifeOS forward and opened the task form: the global shortcut was observed outside LifeOS, not inferred from a frontend key handler. A clearly marked unsaved QA title was entered. Clicking the native title-bar X displayed the discard/continue dialog; continuing preserved the exact draft title. The test form was returned to its initial state and dismissed without creating a record. This passes the tested native dirty-form close path. Course tasks, their five visible 30-minute reminders and the existing QA note survived the update.
+
+Source b64b3c0 passed both CI jobs at https://github.com/eFurkanSngl/LifeOS/actions/runs/42278921604 and was installed with exit 0 for WebView memory measurements. Final day-slot alignment and empty-title corrections follow in later commits; final installation evidence is appended separately. Local acceptance now includes 63 tests and 16 browser flows.
+
 ## Latest owner confirmation and desktop work
 
 After the prior suppression investigation, the owner explicitly confirmed both sound and banner working. This closes the Settings test delivery check only; the entire tray/sleep/toast-action matrix still requires LIVE_TEST.md. Web use/deployment was deferred by the owner. Desktop source b2868c1 adds global capture, native form close protection, frequency-aware habit progress, Markdown preview, persistent workspace sizing, focus presets and 15-minute day-planner dropping/keyboard movement. Local 63 tests and 15 browser flows pass. Its Windows CI/package and installed spot checks are tracked separately below. Do not infer all live acceptance from these source changes.

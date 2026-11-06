@@ -54,6 +54,8 @@ Yeni global kısayol ve native form kapatma koruması dahil [canlı test listesi
 
 Web kullanımı/yayını ve iki istemci kabul testi kullanıcı tercihiyle ertelendi. Veri modeli sürümlü tipli zarflardır; tam normalize ilişkisel model, incremental/realtime sync ve otomatik Codex keşfi ayrıca açıktır.
 
+Kurulu bellek iyileştirmeli pakette tek örnek ölçümleri: takvim ön planda yaklaşık **414 MiB**, Windows Ayarlar arkasında **54 MiB** toplam çalışma kümesi. Arka plandaki özel ayrılmış bellek yaklaşık 225 MiB’dir; bu farklı bir metriktir. Ölçüm sınırları [PERFORMANCE](docs/PERFORMANCE.md) dosyasındadır.
+
 ## Geliştirme
 
 Node.js 24, pnpm 11.25.0. Native kaynak derlemesi Rust, Visual Studio C++ araçları ve Windows SDK ister. Bu makinede yerel kaynak derlemesi MSVC linker eksikti; Windows CI installer üretir.
