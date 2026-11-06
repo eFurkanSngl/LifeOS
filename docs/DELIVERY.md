@@ -8,7 +8,7 @@ Verified in local automated tests: task capture/edit/schedule/complete/undo/relo
 
 Implemented but **not native-runtime verified**: Tauri/Rust shell, SQLite-backed background scheduler, quiet hours, missed-due queries, durable duplicate claims, system tray, opt-in startup, native focus reconciliation, native toast actions, sound selection, OS-browser link opening and Windows Credential Manager auth storage. Windows CI now passes cargo check, six Rust tests and NSIS packaging. The package was installed, updated and launched locally. Settings notification-history UI loaded and a test dispatch request was accepted. Actual banner/sound delivery and the full reminder/tray/resume matrix remain open; see NATIVE_VERIFICATION.md.
 
-Implemented but **not live-cloud verified**: Supabase email/password authentication, automatic/manual sync, pending mutation retry/backoff, conflict resolution UI and native/web account synchronization. The dedicated LifeOS schema and role-based isolation are now live; see CLOUD_VERIFICATION.md. Owner login, deployment and two-device sync are still unverified.
+**Live native cloud checkpoint passed:** the owner signed into the installed configured app with email/password; a native QA note reached Supabase, and a targeted server edit returned to the native editor after manual sync. The dedicated LifeOS schema and role-based isolation are live; see CLOUD_VERIFICATION.md. Separate web/desktop clients, offline retry/conflicts, session restart/rotation and production deployment remain unverified.
 
 ## B. Architecture
 
@@ -51,7 +51,7 @@ Full setup is in SETUP.md. Source files are committed and pushed to the private 
 ## E. External configuration
 
 - **Windows:** install the Visual Studio C++ workload, x64/x86 MSVC build tools and Windows SDK, verify WebView2, then rebuild in an appropriate developer terminal. Rust 1.99.1 is available locally under `.tools` without a system PATH modification. Cargo.lock is generated. Local source compilation still reports `link.exe not found`; Windows CI separately provides successful native compilation/tests/package evidence.
-- **Supabase:** the dedicated LifeOS Free organization/project is live in Frankfurt. The initial schema and owner RLS were applied and tested on actual PostgreSQL, with all probe fixtures rolled back. Signup is disabled. The owner selected email/password login; their account/password setup and real signed-in two-device sync are the next gates. See CLOUD_VERIFICATION.md. No service-role key or database password was collected.
+- **Supabase:** the dedicated LifeOS Free organization/project is live in Frankfurt. The initial schema and owner RLS were applied and tested on actual PostgreSQL, with isolation probe fixtures rolled back. Signup is disabled. Owner email/password login and a real native push/pull passed; separate-client offline/conflict checks remain open. See CLOUD_VERIFICATION.md. No service-role key or database password was collected.
 - **Vercel:** follow SETUP.md for monorepo root/build settings and public environment values. Preview/production deployment has not been authorized or performed.
 - **MCP:** enable the local desktop setting and register the documented stdio process with LIFEOS_MCP_ENABLED and the existing SQLite path. Manual Codex references do not imply automatic account chat discovery.
 
@@ -70,7 +70,7 @@ Full setup is in SETUP.md. Source files are committed and pushed to the private 
 | Cargo check                                | **Passed on Windows CI**; local source compile still lacks MSVC linker                                                                                                                          |
 | Rust tests / NSIS installer                | **6 passed**, package built in Windows CI; installer install/update exited 0 and app opened locally                                                                                             |
 | Actual notifications/tray/resume           | **Open**; native test request accepted, visible banner/sound/action/recovery not verified                                                                                                       |
-| Live Supabase auth / RLS / two-device sync | Live PostgreSQL RLS/CAS and unauthenticated REST denial passed; real owner login and two-device sync are pending                                                                                |
+| Live Supabase auth / RLS / two-device sync | Live RLS/CAS, unauthenticated denial, native owner login and native push/server-edit/pull passed; separate-client offline/conflict acceptance pending                                          |
 | Vercel deployment                          | **Not performed**                                                                                                                                                                               |
 | Native memory                              | First warm visible empty-state sample: **430.25 MiB** summed working sets (LifeOS + 6 WebView processes); above target, not a full benchmark                                                    |
 
@@ -90,7 +90,7 @@ Recurring tasks now create one deterministic alarm for every configured occurren
 
 1. Windows CI check/tests/package now pass. Use the latest unsigned artifact for the installed acceptance matrix; local source development still needs the C++ workload.
 2. Execute every installed-Windows acceptance check in REMINDER_ENGINE.md. Verify quiet hours, tray close, restart/sleep recovery, toast actions, sound, credentials, focus completion and actual memory usage.
-3. Configure the dedicated Supabase owner project and run the live email/login/offline/conflict checks in SETUP.md. Run cloud security advisors and verify unrelated-user access is denied.
+3. Complete separate-client offline/conflict, sign-out and session restart/rotation checks in SETUP.md; dedicated project setup, native password login and native push/pull now pass. Run cloud security advisors; unrelated-user denial has passed the transaction-only role probe.
 4. Verify the implemented recurring native alarms and uncertain-event recovery on the installed app, then close normalization/sync/security and memory-performance gates in ROADMAP.md before describing the full specification as complete.
 
 Current cloud setup and verification boundaries: [CLOUD_VERIFICATION](CLOUD_VERIFICATION.md).

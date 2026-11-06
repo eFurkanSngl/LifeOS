@@ -31,4 +31,8 @@ Only processes with the LifeOS executable or its `local.lifeos.workspace` WebVie
 
 ## Remaining installed acceptance
 
-Follow REMINDER_ENGINE.md for visible banners, sound and toast actions, quiet hours, snooze/retry, hidden tray, sleep/resume, crash-window recovery, rolling recurrence, focus completion, explicit startup, real credential rotation, populated upgrade and backup recovery. Never infer these passes from CI or payload acceptance. Live cloud verification awaits the new Supabase account/project selected by the owner.
+Follow REMINDER_ENGINE.md for visible banners, sound and toast actions, quiet hours, snooze/retry, hidden tray, sleep/resume, crash-window recovery, rolling recurrence, focus completion, explicit startup, real credential rotation, populated upgrade and backup recovery. Never infer these passes from CI or payload acceptance.
+
+## Configured cloud build update
+
+Source `3f2648d`, workflow https://github.com/eFurkanSngl/LifeOS/actions/runs/42230877395: frontend and Windows native jobs both passed, including 58 Vitest tests, 13 browser tests, six Rust tests and NSIS packaging. The new installer updated `.tools/native-run` with exit 0 after the owner closed the previous app. The configured app reopened, the owner signed in themselves, and a real native-to-Supabase-to-native QA note roundtrip passed. See CLOUD_VERIFICATION.md for the exact boundary. Session restart/rotation and the reminder matrix remain open.
