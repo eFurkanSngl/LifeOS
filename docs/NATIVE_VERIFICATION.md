@@ -1,5 +1,9 @@
 # Windows verification checkpoint — 6 November 2026
 
+## Latest owner confirmation and desktop work
+
+After the prior suppression investigation, the owner explicitly confirmed both sound and banner working. This closes the Settings test delivery check only; the entire tray/sleep/toast-action matrix still requires LIVE_TEST.md. Web use/deployment was deferred by the owner. Desktop source b2868c1 adds global capture, native form close protection, frequency-aware habit progress, Markdown preview, persistent workspace sizing, focus presets and 15-minute day-planner dropping/keyboard movement. Local 63 tests and 15 browser flows pass. Its Windows CI/package and installed spot checks are tracked separately below. Do not infer all live acceptance from these source changes.
+
 Source: `0617b9c72ed6ce3c49f7580b8822fcf786ec44bb`.
 [Windows CI job](https://github.com/eFurkanSngl/LifeOS/actions/runs/42107806130/job/127527153519): cargo check, six Rust tests, optimized Tauri build and NSIS artifact upload all passed. The overall run had a frontend test failure caused by reloading before reminder saving finished; that test now waits for the editor to close and all 13 local browser checks pass. The corrected frontend job on source `2cb8727` passed all checks including 56 Vitest tests and 13 Chromium E2E checks: https://github.com/eFurkanSngl/LifeOS/actions/runs/42109011712/job/127531324774. Windows source code is unchanged from the successfully packaged commit.
 

@@ -3,6 +3,8 @@ test("protects dirty forms from accidental dismissal", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "İlk görevini ekle" }).click();
   await page.getByLabel("Başlık *").fill("Korunacak taslak");
+  await page.keyboard.press("Control+Shift+A");
+  await expect(page.getByLabel("Başlık *")).toHaveValue("Korunacak taslak");
   await page.keyboard.press("Escape");
   await expect(
     page

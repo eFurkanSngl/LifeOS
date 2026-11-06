@@ -1,11 +1,13 @@
-# Remaining delivery gates
+# Remaining delivery gates — desktop priority
 
-1. Execute the full installed reminder/tray/resume checklist. Windows CI check/test/package and local installer launch now pass; see NATIVE_VERIFICATION.md. This is the main daily-use gate.
-2. Verify the implemented native toast actions and sound policy; verify the new dispatch error/uncertain-event recovery UI, Windows settings link, and per-occurrence recurring reminders on the installed app. These are implemented and have targeted unit/browser coverage; visible banner/action/sleep recovery acceptance remains open.
-3. The separate LifeOS organization/project, initial schema, owner isolation, owner-selected password login, real native push/pull and clean-restart session restoration are verified; see CLOUD_VERIFICATION.md. Next verify separate desktop/web clients, offline sync, conflict recovery, sign-out and Windows credential expiry/rotation. Register the existing SQL-applied migration in CLI history before future db push.
-4. Move the envelope store to normalized relational tables with complete server-side domain validation, add incremental durable sync metadata/realtime, and exercise partial graph recovery and device-account separation.
-5. Improve habit frequency-aware streak/target views (current streak is a calendar-day streak), prayer manual time blocks, Markdown preview, reminder-specific types, full keyboard reorder and custom focus presets. The planner supports day dragging and form-based time edits; minute-precision calendar dragging is not implemented.
-6. Optional local Codex supported discovery adapter and global capture hotkey. Existing manual references, HTTPS links and MCP remain useful independently.
-7. Measure Windows memory/CPU/startup, tighten nonce-based web CSP, complete a production security/accessibility audit and installer upgrade/backup recovery validation. The first native working-set sample is 430.25 MiB with WebView helpers, above the 60–120 MB goal; CPU/startup and sustained workload measurement remain open.
+Web usage/deployment and two-client web/desktop acceptance are explicitly deferred by the owner.
 
-No SaaS features, paid AI providers, scraping or external messaging automation are planned for v1.
+1. **Installed acceptance:** the owner confirmed Settings notification banner and sound. Background submission and clean-restart duplicate suppression passed. Complete tray/minimized, missed startup, sleep/resume, quiet hours, snooze/reschedule and toast actions using LIVE_TEST.md; these remain real user checks.
+2. **Data and session recovery:** real native login, push/pull and clean-restart session restoration passed. Offline SQLite graph persistence and duplicate-safe backup restoration have automated coverage. Real expiry/rotation, sign-out, full populated upgrade and restore acceptance remain open.
+3. **Desktop features:** Markdown preview, weekday/weekly habit goals and streaks, global capture, persisted workspace sizing, custom focus presets, dirty-form/native close warning and 15-minute day-planner dropping/keyboard movement are implemented in b2868c1. Native spot checks and the user's final live test follow; prayer times can use manually scheduled tasks/routines, with no location/calculation provider.
+4. **Performance:** main JS decreased from about 744 kB to 615 kB; gzip 223 kB to 182 kB. Measure the installed build using PERFORMANCE.md. The previous 430.25 MiB summed working set exceeded the 60–120 MiB target; no claim of achieving that target yet.
+5. **Calendar:** five source-confirmed future Anadolu eKampüs sessions were imported into native SQLite with 30-minute sound-enabled alarms after taking a backup. No inferred recurring lessons were created. This is a one-time import, not automatic schedule monitoring.
+6. **Optional MCP connection:** twelve tested stdio tools exist for notes/tasks/reminders. App opt-in and client registration remain necessary. Automatic chat discovery, Codex deep-link launching and universal ChatGPT integration are not implemented.
+7. **Separate architecture work:** normalize the envelope store, complete server-side domain constraints, incremental sync/realtime and partial graph transaction recovery. Register the SQL-applied initial migration in Supabase CLI history before future db push. These are not silently treated as completed desktop work.
+
+No SaaS, paid AI, external messaging automation or hidden data collection is planned.

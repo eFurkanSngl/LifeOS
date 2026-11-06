@@ -170,7 +170,7 @@ export function LifeOS({
         e.key.toLowerCase() === "a"
       ) {
         e.preventDefault();
-        setEditing({ kind: "task" });
+        setEditing((current) => current ?? { kind: "task" });
       }
     };
     window.addEventListener("keydown", keys);

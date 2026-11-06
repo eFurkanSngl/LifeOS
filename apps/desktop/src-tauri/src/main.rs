@@ -750,6 +750,29 @@ fn main() {
             Ok(())
         })
         .on_window_event(|window, event| {
+            #[cfg(windows)]
+            if let tauri::WindowEvent::Focused(focused) = event {
+                use windows_core::Interface;
+                use webview2_com::Microsoft::Web::WebView2::Win32::{
+                    ICoreWebView2_19, COREWEBVIEW2_MEMORY_USAGE_TARGET_LEVEL_LOW,
+                    COREWEBVIEW2_MEMORY_USAGE_TARGET_LEVEL_NORMAL,
+                };
+                let focused = *focused;
+                if let Some(webview) = window.app_handle().get_webview_window(window.label()) {
+                    let _ = webview.with_webview(move |platform| unsafe {
+                        // Optional interface: older runtimes simply retain their default policy.
+                        if let Ok(core) = platform.controller().CoreWebView2() {
+                            if let Ok(memory) = core.cast::<ICoreWebView2_19>() {
+                                let _ = memory.SetMemoryUsageTargetLevel(if focused {
+                                    COREWEBVIEW2_MEMORY_USAGE_TARGET_LEVEL_NORMAL
+                                } else {
+                                    COREWEBVIEW2_MEMORY_USAGE_TARGET_LEVEL_LOW
+                                });
+                            }
+                        }
+                    });
+                }
+            }
             let state = window.state::<Store>();
             let config = state
                 .db

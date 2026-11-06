@@ -2131,6 +2131,8 @@ dependencies = [
  "tauri-plugin-single-instance",
  "url",
  "uuid",
+ "webview2-com",
+ "windows-core",
 ]
 
 [[package]]

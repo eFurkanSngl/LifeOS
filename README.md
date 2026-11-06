@@ -1,71 +1,87 @@
 # LifeOS
 
-A private Turkish productivity workspace for Windows and the web. No billing, analytics, paid AI API, public registration, or seeded activity.
+**Düşüncelerine yer aç.** Görev, ders, rutin, not ve odak çalışmaların için kişisel Windows uygulaması. Yerel SQLite, isteğe bağlı Supabase eşitlemesi; reklam, analitik, ücretli AI ve herkese açık kayıt yok.
 
-**Status: working local productivity build; not yet approved for daily Windows reminder reliance.** Web/UI builds and local automated checks run in this repository. Windows CI passes Rust checking, six native unit tests and NSIS packaging. The installer was installed and launched locally. Actual reminder delivery/recovery, live Supabase email authentication, and two-device cloud sync still require the gates in [delivery status](docs/DELIVERY.md). Do not infer native reliability from browser tests.
+![LifeOS genel görünüm](docs/screenshots/dashboard.png)
 
-## Run
+## Windows kurulumu
 
-Requires Node.js 24 and pnpm 11.25.0. In PowerShell, from the repository root:
+1. [Başarılı Actions çalışmasından](https://github.com/eFurkanSngl/LifeOS/actions/workflows/checks.yml) `lifeos-windows-unsigned` paketini indir.
+2. İçindeki `LifeOS_0.1.0_x64-setup.exe` dosyasını kur. Paket şu an imzasızdır.
+3. Yerel kullanım giriş istemez. Bulut için Ayarlar’dan önceden oluşturulmuş hesabına giriş yap.
+4. Ayarlar’dan bildirim testi gönder. Windows **Rahatsız etmeyin**, oyun ve tam ekran kuralları banner ve sesi engelleyebilir.
+5. Açılışta başlatma ve tepsi davranışı kullanıcı tercihidir. Hatırlatıcı için LifeOS işlemi açık kalmalı; uygulama kapalı bilgisayarı uyandıramaz.
+
+`Ctrl+Shift+A`: global hızlı görev ekleme. `Ctrl+K`: uygulama içi arama. Global kısayol başka uygulamadaysa kaydı başarısız olabilir; uygulama çalışmaya devam eder.
+
+## Özellikler
+
+| Alan              | İşlev                                                                                   |
+| ----------------- | --------------------------------------------------------------------------------------- |
+| Görev ve projeler | Öncelik, kategori, bağımsız tekrar kayıtları, kanban, kilometre taşları                 |
+| Takvim            | Gün/hafta/ay; gün görünümünde 15 dakikalık sürükleme; Alt+yön tuşlarıyla taşıma         |
+| Hatırlatıcı       | Kalıcı kuyruk, ses, erteleme, yeniden planlama, sessiz saat ve gönderim geçmişi         |
+| Rutin             | Günlük, hafta içi, haftalık hedef ve frekansa uygun seri                                |
+| Not               | Otomatik kayıt, güvenli Markdown önizleme, taslak çakışması koruması, göreve dönüştürme |
+| Odak              | Zaman damgalı sayaç, duraklat/devam, özel favori süre, geçmiş                           |
+| Kariyer           | Kişiler, başvurular, görüşmeler, takip hatırlatmaları                                   |
+| Çalışma alanı     | ChatGPT bağlantıları, manuel Codex referansları, kalıcı panel genişliği                 |
+| Veri              | JSON yedek/geri yükleme, sürüm koruması, kaydedilmemiş form ve native kapatma uyarısı   |
+
+Markdown başlık, liste, kalın metin ve kodu destekler. HTML çalıştırmaz ve uzak görsel yüklemez; tam bir Markdown editörü değildir.
+
+## Ders takvimi
+
+![Gerçek Windows ders takvimi](docs/screenshots/calendar.png)
+
+Anadolu eKampüs’te görünen beş ileri tarihli oturum kaynak başlangıç/bitiş saatleriyle aktarıldı. Her biri **30 dakika önce sesli uyarır**. Aktarım öncesi yerel yedek alındı. Aktarım tek seferliktir; program değişikliklerini otomatik izlemez. Uyarının gerçek ders saatindeki teslimi ayrıca canlı test gerektirir.
+
+## Codex’ten not ve görev ekleme
+
+Yerel **MCP sunucusu** 12 sınırlı araç sunar. Bağlantı kurulduktan sonra istemciye “LifeOS’a bu görüşmenin notunu ekle” veya açık tarih/saatle görev oluşturma talebi verilebilir.
+
+1. LifeOS Ayarlar’dan yerel MCP erişimini etkinleştirip kaydet.
+2. **Veritabanı yolu** düğmesiyle gerçek SQLite yolunu bul.
+3. [MCP rehberindeki](docs/MCP_INTEGRATION.md) stdio yapılandırmasını Codex’e ekleyip bağlantıyı yenile.
+
+Web yayını ve ücretli API gerekmez. ChatGPT desteği kullanılan istemcinin yerel MCP yeteneğine bağlıdır. Otomatik sohbet aktarımı yoktur. Kullanıcının Codex ayarları otomatik değiştirilmemiştir.
+
+## Doğrulama ve sınırlar
+
+**63 otomatik test, 15 tarayıcı akışı**, TypeScript, lint ve üretim derlemeleri geçti. Native kontrol/test/paket sonucu Actions’ta ayrıca izlenir. Önceki kurulu pakette gerçek bulut girişi, masaüstü→Supabase→masaüstü aktarımı, temiz yeniden başlatmada oturum/kayıt korunumu ve tek arka plan gönderimi doğrulandı. Kullanıcı bildirim ve sesin çalıştığını doğruladı.
+
+Yeni global kısayol ve native form kapatma koruması dahil [canlı test listesi](docs/LIVE_TEST.md) henüz bütünüyle kapanmış değildir. Uyku/çökme/tepsi ve toast eylemlerinin tam matrisi açıktır. Ana JS yaklaşık 744 kB’den 615 kB’ye indi; bu RAM ölçümü değildir. **60–120 MiB bellek hedefi henüz sağlandı diye raporlanmıyor.**
+
+Web kullanımı/yayını ve iki istemci kabul testi kullanıcı tercihiyle ertelendi. Veri modeli sürümlü tipli zarflardır; tam normalize ilişkisel model, incremental/realtime sync ve otomatik Codex keşfi ayrıca açıktır.
+
+## Geliştirme
+
+Node.js 24, pnpm 11.25.0. Native kaynak derlemesi Rust, Visual Studio C++ araçları ve Windows SDK ister. Bu makinede yerel kaynak derlemesi MSVC linker eksikti; Windows CI installer üretir.
 
 ```powershell
-npm install -g pnpm@11.25.0
 pnpm install --frozen-lockfile
-pnpm dev
-```
-
-Open `http://127.0.0.1:3000`. No credentials are needed for local use. Web data lives in this browser's IndexedDB, scoped to its origin. Keep using the same hostname and port. Clearing browser data removes that local copy; export JSON backups.
-
-```powershell
-pnpm dev:desktop  # Vite frontend only, http://localhost:1420
-pnpm desktop     # Real Tauri app; requires Rust/MSVC/WebView2
-pnpm build       # Next.js + desktop frontend production builds
-pnpm --filter @lifeos/desktop tauri build  # Native Windows NSIS installer
-pnpm test
+pnpm dev:desktop                         # Tarayıcı önizlemesi; native bildirim değildir
+pnpm desktop                             # Gerçek Tauri uygulaması
+pnpm --filter @lifeos/desktop tauri build
 pnpm typecheck
 pnpm lint
+pnpm test
+pnpm build
 pnpm test:e2e
 ```
 
-The Vite browser preview uses IndexedDB. Only the real Tauri process uses SQLite and native notifications. `Ctrl+Shift+A` captures a task; `Ctrl+K` opens search. Global OS capture is not registered.
-
-## Features
-
-Tasks with editing, dates, priorities, categories, project links, search, grouping, completion/undo, bulk completion, and archive. Bounded timezone-aware recurrence produces separate occurrences with independently persisted optional alarms. Native generation rolls the 35-day window forward even with the webview hidden. Failed or uncertain native dispatches can be reviewed and explicitly retried in Settings. Day/week/month planning supports moving a task to another day by dragging; precise start times are edited in the task form. Projects include task lists, kanban, milestones, bug type/severity, and notes. Habits have persistent daily logs. Focus sessions use timestamps, survive reloads, and create persistent native reminder records. Career contacts, applications, interactions and follow-ups are editable. Notes autosave, can be pinned/archived and converted into tasks/projects. The workspace contains validated ChatGPT links and manually registered Codex references. Twelve optional stdio MCP tools share the desktop database.
-
-Cloud access uses Supabase email/password authentication for an existing owner. Sync retains dirty records, checks versions, preserves tombstones, retries failures, and presents both conflict versions. Native auth uses Windows Credential Manager; web auth uses session storage. The cloud implementation still needs live verification.
-
-## Architecture and files
-
 ```text
-apps/
-  desktop/             Vite/React + Tauri/Rust Windows shell
-  web/                 Next.js App Router client
-packages/
-  ui/                  shared Turkish UI, tokens, feature modules
-  core/                recurrence, timezones, timers, schedule calculations
-  validation/          strict Zod domain schemas and backup envelopes
-  database/            IndexedDB, native IPC, Node SQLite, application service
-  integrations/        Supabase authentication/sync adapter and registry
-services/mcp-server/   official MCP SDK, stdio, explicit tool allowlist
-supabase/             canonical PostgreSQL schema and CLI configuration
-tests/                domain, persistence, PostgreSQL RLS, MCP, RTL, Edge E2E
-docs/                 architecture, setup, verification and limitations
-.github/workflows/    frontend checks and Windows Rust/build workflow
+apps/desktop          Vite + React + Tauri/Rust
+apps/web              Ertelenen Next.js istemcisi
+packages/ui           Türkçe arayüz
+packages/core         Zaman, tekrarlar, hedef ve seri
+packages/validation   Zod doğrulaması
+packages/database     SQLite / IndexedDB / native IPC
+packages/integrations Supabase giriş ve eşitleme
+services/mcp-server   Yerel stdio MCP
+supabase              Şema ve migration
 ```
 
-The first version deliberately uses versioned typed record envelopes instead of 25 separate domain tables. Cloud ownership and relational references are enforced, but this is **not the fully normalized relational model from the master specification**. This tradeoff and migration path are documented in [DATABASE](docs/DATABASE.md).
+[Kurulum](docs/SETUP.md) · [Canlı test](docs/LIVE_TEST.md) · [Native doğrulama](docs/NATIVE_VERIFICATION.md) · [Bulut](docs/CLOUD_VERIFICATION.md) · [Mimari](docs/ARCHITECTURE.md) · [Güvenlik](docs/SECURITY.md) · [Kalanlar](docs/ROADMAP.md)
 
-## Configuration and verification
-
-- [Setup, Supabase and Vercel](docs/SETUP.md)
-- [Architecture](docs/ARCHITECTURE.md), [database](docs/DATABASE.md), [sync](docs/SYNC_ENGINE.md)
-- [Reminder engine and Windows acceptance checklist](docs/REMINDER_ENGINE.md)
-- [MCP connection guide](docs/MCP_INTEGRATION.md)
-- [Security and threat model](docs/SECURITY.md)
-- [Completed / pending delivery gates](docs/DELIVERY.md)
-- [Product scope and roadmap](docs/PRD.md), [ROADMAP](docs/ROADMAP.md)
-
-Source is stored in the private GitHub repository https://github.com/eFurkanSngl/LifeOS. No production deployment has been performed. No open-source license is granted; licensing remains undecided.
-
-Live configuration: [cloud checkpoint](docs/CLOUD_VERIFICATION.md).
+Yedekler kişisel kayıt içerir; özel sakla. Auth parolaları kayıt yedeklerine konmaz. Depo özeldir; açık kaynak lisansı verilmemiştir.

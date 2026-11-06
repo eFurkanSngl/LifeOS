@@ -1,5 +1,9 @@
 # LifeOS delivery checkpoint — 6 November 2026
 
+## Desktop-first checkpoint (supersedes older feature/test counts below)
+
+The owner deferred web usage/deployment and web–desktop live testing, and confirmed Windows test banner plus sound working. Desktop source b2868c1 adds safe Markdown preview, weekday/weekly habit progress, custom focus favorites, persistent panel resizing, a global capture shortcut, native dirty-form close protection and 15-minute day-calendar drops/keyboard movement. Local validation: 63 tests in 11 suites, 15 Edge browser flows, TypeScript, lint and both production builds passed. Main desktop JS is about 615 kB / 182 kB gzip. Native CI/package, installation and performance are recorded in NATIVE_VERIFICATION.md and PERFORMANCE.md; neither the memory target nor all live gates are closed by this work. Five real future Anadolu sessions were imported with source-confirmed times, 30-minute sound-enabled alarms and a prior local backup. Personal import files are ignored and are not committed. See LIVE_TEST.md for the consolidated user acceptance handoff. Full relational normalization/incremental sync and automatic Codex discovery remain separate open architecture work.
+
 **A functioning local productivity application has been implemented. The complete master specification is not finished and the Windows daily-use reminder gate is not passed.** Source code, local test evidence and live production verification are distinct below.
 
 ## A. Completed features and evidence
