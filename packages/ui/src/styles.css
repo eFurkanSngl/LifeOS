@@ -2524,3 +2524,10 @@ main {
 .time-drop-slot:hover {
   background: #315ceb18;
 }
+.planner.day .time-drop-grid {
+  position: absolute;
+  top: 78px;
+  left: 10px;
+  right: 10px;
+  margin-top: 0;
+}

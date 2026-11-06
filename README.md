@@ -48,7 +48,7 @@ Web yayını ve ücretli API gerekmez. ChatGPT desteği kullanılan istemcinin y
 
 ## Doğrulama ve sınırlar
 
-**63 otomatik test, 15 tarayıcı akışı**, TypeScript, lint ve üretim derlemeleri geçti. Native kontrol/test/paket sonucu Actions’ta ayrıca izlenir. Önceki kurulu pakette gerçek bulut girişi, masaüstü→Supabase→masaüstü aktarımı, temiz yeniden başlatmada oturum/kayıt korunumu ve tek arka plan gönderimi doğrulandı. Kullanıcı bildirim ve sesin çalıştığını doğruladı.
+**63 otomatik test, 16 tarayıcı akışı**, TypeScript, lint ve üretim derlemeleri geçti. Native kontrol/test/paket sonucu Actions’ta ayrıca izlenir. Önceki kurulu pakette gerçek bulut girişi, masaüstü→Supabase→masaüstü aktarımı, temiz yeniden başlatmada oturum/kayıt korunumu ve tek arka plan gönderimi doğrulandı. Kullanıcı bildirim ve sesin çalıştığını doğruladı.
 
 Yeni global kısayol ve native form kapatma koruması dahil [canlı test listesi](docs/LIVE_TEST.md) henüz bütünüyle kapanmış değildir. Uyku/çökme/tepsi ve toast eylemlerinin tam matrisi açıktır. Ana JS yaklaşık 744 kB’den 615 kB’ye indi; bu RAM ölçümü değildir. **60–120 MiB bellek hedefi henüz sağlandı diye raporlanmıyor.**
 

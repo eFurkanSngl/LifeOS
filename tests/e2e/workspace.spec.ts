@@ -62,6 +62,38 @@ test.beforeEach(async ({ page }) => {
     page.getByRole("button", { name: "İlk görevini ekle" }),
   ).toBeVisible();
 });
+test("moves a calendar task to a quarter-hour slot and persists it", async ({
+  page,
+}) => {
+  await page.getByRole("button", { name: "İlk görevini ekle" }).click();
+  await page.getByLabel("Başlık *").fill("Quarter-hour task");
+  await page.getByLabel("Planlanan başlangıç").fill("2026-11-06T09:00");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Kaydet", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: "Planlayıcı", exact: true })
+    .click();
+  await page.getByLabel("Tarih", { exact: true }).fill("2026-11-06");
+  await page.getByRole("button", { name: "Gün", exact: true }).click();
+  await page
+    .locator(".schedule-block")
+    .filter({ hasText: "Quarter-hour task" })
+    .dragTo(
+      page.getByRole("button", { name: "2026-11-06 13:00", exact: true }),
+      { targetPosition: { x: 20, y: 18 } },
+    );
+  await expect(
+    page.locator(".schedule-block").filter({ hasText: "Quarter-hour task" }),
+  ).toContainText("13:15");
+  await page.reload();
+  await expect(
+    page.locator(".schedule-block").filter({ hasText: "Quarter-hour task" }),
+  ).toContainText("13:15");
+});
 test("captures, schedules, edits, completes and persists a task", async ({
   page,
 }) => {
