@@ -24,9 +24,8 @@ import { Backup, download, type Edit } from "./features";
 import { NotificationLog } from "./notification-log";
 export function Settings({ store, edit }: { store: LifeStore; edit: Edit }) {
   const [email, setEmail] = useState(""),
-    [token, setToken] = useState(""),
-    [codeSent, setCodeSent] = useState(false),
-    [signed, setSigned] = useState(false),
+    [password, setPassword] = useState(""),
+    [signingIn, setSigningIn] = useState(false),
     [startup, setStartup] = useState<boolean | null>(null);
   const native = isTauri();
   const [dbPath, setDbPath] = useState("");
@@ -131,12 +130,12 @@ export function Settings({ store, edit }: { store: LifeStore; edit: Edit }) {
               onSubmit={(e) => {
                 e.preventDefault();
                 void store.run(async () => {
-                  if (codeSent) {
-                    await store.cloud!.verify(email, token);
-                    setSigned(true);
-                  } else {
-                    await store.cloud!.sendCode(email);
-                    setCodeSent(true);
+                  setSigningIn(true);
+                  try {
+                    await store.cloud!.signIn(email, password);
+                  } finally {
+                    setPassword("");
+                    setSigningIn(false);
                   }
                 }, tr.saved);
               }}
@@ -151,27 +150,25 @@ export function Settings({ store, edit }: { store: LifeStore; edit: Edit }) {
                   autoComplete="email"
                 />
               </label>
-              {codeSent && (
-                <label>
-                  {tr.token}
-                  <input
-                    required
-                    inputMode="numeric"
-                    value={token}
-                    onChange={(e) => setToken(e.target.value)}
-                    autoComplete="one-time-code"
-                  />
-                </label>
-              )}
-              <button className="button primary">
+              <label>
+                {tr.password}
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
+                />
+              </label>
+              <button className="button primary" disabled={signingIn}>
                 <Mail size={15} />
-                {codeSent ? tr.verify : tr.sendCode}
+                {signingIn ? "…" : tr.signin}
               </button>
             </form>
-            {signed && (
+            {store.signedIn && (
               <p className="success-text">
                 <ShieldCheck size={15} />
-                {tr.saved}
+                {tr.signedIn}
               </p>
             )}
             <div className="backup-actions">
@@ -191,7 +188,6 @@ export function Settings({ store, edit }: { store: LifeStore; edit: Edit }) {
                       scope: "local",
                     });
                     if (error) throw new Error(error.message);
-                    setSigned(false);
                   })
                 }
               >

@@ -69,7 +69,8 @@ export function useLife(cloudUrl?: string, cloudKey?: string) {
     const boot = async () => {
       try {
         await refresh();
-        if (mounted) setReady(true);
+        if (!mounted) return;
+        setReady(true);
         if (isTauri()) {
           const dispose = await listen(
             "records-changed",
@@ -83,7 +84,7 @@ export function useLife(cloudUrl?: string, cloudKey?: string) {
             void refresh().catch((e) => setError(String(e)));
         }
         if (cloudUrl && cloudKey) {
-          cloudRef.current = new CloudAdapter(
+          cloudRef.current ??= new CloudAdapter(
             cloudUrl,
             cloudKey,
             isTauri() ? nativeAuthStorage : undefined,
@@ -262,6 +263,7 @@ export function useLife(cloudUrl?: string, cloudKey?: string) {
     settingsRecord,
     sync,
     syncing,
+    signedIn,
     conflicts,
     setConflicts,
     lastSync,

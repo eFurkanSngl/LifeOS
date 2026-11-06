@@ -234,6 +234,9 @@ export const tr = {
   accountHint:
     "Yerel kullanım giriş gerektirmez. Bulut erişimi yalnızca önceden oluşturduğun hesabına açıktır.",
   email: "E-posta",
+  password: "Şifre",
+  signin: "Giriş yap",
+  signedIn: "Bulut hesabına giriş yapıldı.",
   token: "E-postadaki doğrulama kodu",
   sendCode: "Giriş kodu gönder",
   verify: "Kodu doğrula",

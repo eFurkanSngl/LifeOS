@@ -38,6 +38,15 @@ export class CloudAdapter {
     });
     if (error) throw new Error(error.message);
   }
+  async signIn(email: string, password: string) {
+    const { error } = await this.client.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+    // Never surface raw provider details or credentials in a UI error/log.
+    if (error)
+      throw new Error("Giriş yapılamadı. E-posta ve şifrenizi kontrol edin.");
+  }
   async verify(email: string, token: string) {
     const { error } = await this.client.auth.verifyOtp({
       email,

@@ -33,7 +33,7 @@ The Vite browser preview uses IndexedDB. Only the real Tauri process uses SQLite
 
 Tasks with editing, dates, priorities, categories, project links, search, grouping, completion/undo, bulk completion, and archive. Bounded timezone-aware recurrence produces separate occurrences with independently persisted optional alarms. Native generation rolls the 35-day window forward even with the webview hidden. Failed or uncertain native dispatches can be reviewed and explicitly retried in Settings. Day/week/month planning supports moving a task to another day by dragging; precise start times are edited in the task form. Projects include task lists, kanban, milestones, bug type/severity, and notes. Habits have persistent daily logs. Focus sessions use timestamps, survive reloads, and create persistent native reminder records. Career contacts, applications, interactions and follow-ups are editable. Notes autosave, can be pinned/archived and converted into tasks/projects. The workspace contains validated ChatGPT links and manually registered Codex references. Twelve optional stdio MCP tools share the desktop database.
 
-Cloud access uses Supabase email OTP for an existing owner. Sync retains dirty records, checks versions, preserves tombstones, retries failures, and presents both conflict versions. Native auth uses Windows Credential Manager; web auth uses session storage. The cloud implementation still needs live verification.
+Cloud access uses Supabase email/password authentication for an existing owner. Sync retains dirty records, checks versions, preserves tombstones, retries failures, and presents both conflict versions. Native auth uses Windows Credential Manager; web auth uses session storage. The cloud implementation still needs live verification.
 
 ## Architecture and files
 
@@ -67,3 +67,5 @@ The first version deliberately uses versioned typed record envelopes instead of 
 - [Product scope and roadmap](docs/PRD.md), [ROADMAP](docs/ROADMAP.md)
 
 Source is stored in the private GitHub repository https://github.com/eFurkanSngl/LifeOS. No production deployment has been performed. No open-source license is granted; licensing remains undecided.
+
+Live configuration: [cloud checkpoint](docs/CLOUD_VERIFICATION.md).
