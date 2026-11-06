@@ -418,7 +418,8 @@ export function RecordForm({
         scheduledAt: undefined,
         tags: [],
       });
-      if (parsed.success) base = { ...parsed.data, ...base };
+      if (parsed.success)
+        base = { ...parsed.data, ...base, title: base.title ?? "" };
     }
     return base;
   });

@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 test("protects dirty forms from accidental dismissal", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "İlk görevini ekle" }).click();
+  await expect(page.getByLabel("Başlık *")).toHaveValue("");
   await page.getByLabel("Başlık *").fill("Korunacak taslak");
   await page.keyboard.press("Control+Shift+A");
   await expect(page.getByLabel("Başlık *")).toHaveValue("Korunacak taslak");
