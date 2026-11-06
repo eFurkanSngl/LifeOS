@@ -4,12 +4,19 @@ use chrono::{Timelike, Utc};
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::{sync::Mutex, time::Duration};
+use std::{
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Mutex,
+    },
+    time::Duration,
+};
 use tauri::{
     menu::{Menu, MenuItem},
     tray::TrayIconBuilder,
     Emitter, Manager,
 };
+use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
 use tauri_plugin_notification::NotificationExt;
 
 const SETTINGS: &str = "00000000-0000-4000-8000-000000000001";
@@ -32,6 +39,18 @@ const KINDS: &[&str] = &[
 ];
 struct Store {
     db: Mutex<Connection>,
+    form_dirty: AtomicBool,
+}
+#[tauri::command]
+fn set_form_dirty(state: tauri::State<Store>, dirty: bool) {
+    state.form_dirty.store(dirty, Ordering::SeqCst);
+}
+#[tauri::command]
+fn close_after_discard(app: tauri::AppHandle, state: tauri::State<Store>) {
+    state.form_dirty.store(false, Ordering::SeqCst);
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.close();
+    }
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -623,6 +642,16 @@ fn main() {
             }
         }))
         .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_global_shortcut::Builder::new().with_handler(|app, _shortcut, event| {
+            if event.state == ShortcutState::Pressed {
+                if let Some(window) = app.get_webview_window("main") {
+                    let _ = window.show();
+                    let _ = window.unminimize();
+                    let _ = window.set_focus();
+                }
+                let _ = app.emit("quick-capture", ());
+            }
+        }).build())
         .plugin(tauri_plugin_opener::init())
         .plugin(
             tauri_plugin_autostart::Builder::new()
@@ -630,6 +659,10 @@ fn main() {
                 .build(),
         )
         .setup(|app| {
+            // A shortcut owned by another app must never prevent LifeOS from starting.
+            if let Err(error) = app.global_shortcut().register("Ctrl+Shift+A") {
+                eprintln!("LifeOS capture shortcut unavailable: {}", error);
+            }
             let dir = app.path().app_data_dir()?;
             std::fs::create_dir_all(&dir)?;
             let db = Connection::open(dir.join("lifeos.sqlite"))?;
@@ -639,7 +672,7 @@ fn main() {
             }
             db.execute_batch(include_str!("../../../../packages/database/schema.sql"))?;
             db.execute("UPDATE notification_events SET state='uncertain',detail='Application restarted before dispatch acknowledgement' WHERE state='dispatching'",[])?;
-            app.manage(Store { db: Mutex::new(db) });
+            app.manage(Store { db: Mutex::new(db), form_dirty: AtomicBool::new(false) });
             use tauri_plugin_notification::{Action, ActionType};
             app.notification()
                 .register_action_types(vec![ActionType::builder("lifeos-reminder")
@@ -726,6 +759,11 @@ fn main() {
                 .unwrap_or_default();
             match event {
                 tauri::WindowEvent::CloseRequested { api, .. } => {
+                    if state.form_dirty.load(Ordering::SeqCst) {
+                        api.prevent_close();
+                        let _ = window.emit("confirm-form-close", ());
+                        return;
+                    }
                     if config["closeToTray"] == true {
                         api.prevent_close();
                         let _ = window.hide();
@@ -740,6 +778,8 @@ fn main() {
             }
         })
         .invoke_handler(tauri::generate_handler![
+            set_form_dirty,
+            close_after_discard,
             list_records,
             put_record,
             test_notification,

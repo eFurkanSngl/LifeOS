@@ -19,7 +19,9 @@ import {
   EditButton,
   DeleteButton,
 } from "./components";
-import { FocusPanel, ProjectCard, type Edit } from "./features";
+import { FocusPanel } from "./features/focus";
+import { ProjectCard } from "./features/projects";
+import type { Edit } from "./features/types";
 import type { LifeStore } from "./store";
 export function Reminders({
   store,
@@ -37,40 +39,36 @@ export function Reminders({
     .sort((a, b) => a.data.fireAt.localeCompare(b.data.fireAt));
   const action = async (r: TypedEntity<"reminder">, complete = false) => {
     await store.run(async () => {
-      await store
-        .service()
-        .save(
-          "reminder",
-          {
-            ...r.data,
-            status: complete ? "completed" : "pending",
-            deliveredAt: undefined,
-            fireAt: complete
-              ? r.data.fireAt
-              : new Date(
-                  Date.now() + store.settings.snoozeMinutes * 60000,
-                ).toISOString(),
-          },
-          r.id,
-          r.version,
-        );
+      await store.service().save(
+        "reminder",
+        {
+          ...r.data,
+          status: complete ? "completed" : "pending",
+          deliveredAt: undefined,
+          fireAt: complete
+            ? r.data.fireAt
+            : new Date(
+                Date.now() + store.settings.snoozeMinutes * 60000,
+              ).toISOString(),
+        },
+        r.id,
+        r.version,
+      );
       if (complete && r.data.taskId) {
         const task = store.records.find(
           (t) => t.id === r.data.taskId && !t.deleted,
         );
         if (task)
-          await store
-            .service()
-            .save(
-              "task",
-              {
-                ...task.data,
-                status: "completed",
-                completedAt: new Date().toISOString(),
-              },
-              task.id,
-              task.version,
-            );
+          await store.service().save(
+            "task",
+            {
+              ...task.data,
+              status: "completed",
+              completedAt: new Date().toISOString(),
+            },
+            task.id,
+            task.version,
+          );
       }
     });
   };

@@ -5,6 +5,7 @@ import { tr } from "../i18n";
 import { Empty, EditButton, DeleteButton } from "../components";
 import type { LifeStore } from "../store";
 import type { Edit } from "./types";
+import { Markdown } from "../markdown";
 export function Ideas({
   store,
   edit,
@@ -60,6 +61,7 @@ function NoteCard({
   edit: Edit;
 }) {
   const draftKey = `lifeos-note-draft:${note.id}`;
+  const [preview, setPreview] = useState(false);
   const readDraft = () => {
     try {
       const value = JSON.parse(sessionStorage.getItem(draftKey) ?? "null") as {
@@ -220,13 +222,24 @@ function NoteCard({
         </div>
       </div>
       <h3>{note.data.title}</h3>
-      <textarea
-        aria-label={tr.body}
-        value={body}
-        onChange={(e) => changeBody(e.target.value)}
-        onBlur={() => void flush()}
-        rows={5}
-      />
+      <button
+        className="text-button"
+        aria-pressed={preview}
+        onClick={() => setPreview(!preview)}
+      >
+        {preview ? tr.write : tr.preview}
+      </button>
+      {preview ? (
+        <Markdown body={body} />
+      ) : (
+        <textarea
+          aria-label={tr.body}
+          value={body}
+          onChange={(e) => changeBody(e.target.value)}
+          onBlur={() => void flush()}
+          rows={5}
+        />
+      )}
       {conflicted ? (
         <div className="error-message" role="alert">
           {tr.noteConflict}

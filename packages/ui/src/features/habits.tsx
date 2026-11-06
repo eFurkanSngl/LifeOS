@@ -1,5 +1,5 @@
 import { Flame, Check } from "lucide-react";
-import { entities, today, streak, type TypedEntity } from "@lifeos/core";
+import { entities, today, habitProgress, type TypedEntity } from "@lifeos/core";
 import { tr, label } from "../i18n";
 import { Empty, EditButton, DeleteButton } from "../components";
 import type { LifeStore } from "../store";
@@ -17,12 +17,24 @@ export function Habits({
     habits = entities(store.records, "habit"),
     logs = entities(store.records, "habitLog");
   const toggle = async (h: TypedEntity<"habit">) => {
+    const progress = habitProgress(
+      logs.filter((l) => l.data.habitId === h.id).map((l) => l.data),
+      day,
+      h.data.frequency,
+      h.data.target,
+    );
     const log = logs.find(
       (l) => l.data.habitId === h.id && l.data.date === day,
     );
     await store.save(
       "habitLog",
-      { habitId: h.id, date: day, count: log?.data.count ? 0 : h.data.target },
+      {
+        habitId: h.id,
+        date: day,
+        count: log?.data.count
+          ? 0
+          : Math.max(1, h.data.target - progress.current),
+      },
       log?.id ?? `${h.id.slice(0, 24)}${day.replaceAll("-", "")}0000`,
       log?.version ?? 0,
     );
@@ -36,12 +48,13 @@ export function Habits({
             .includes(search.toLocaleLowerCase("tr")),
         )
         .map((h) => {
-          const done = logs.some(
-              (l) =>
-                l.data.habitId === h.id &&
-                l.data.date === day &&
-                l.data.count >= h.data.target,
-            ),
+          const progress = habitProgress(
+            logs.filter((l) => l.data.habitId === h.id).map((l) => l.data),
+            day,
+            h.data.frequency,
+            h.data.target,
+          );
+          const done = progress.done,
             dates = logs
               .filter(
                 (l) => l.data.habitId === h.id && l.data.count >= h.data.target,
@@ -80,9 +93,20 @@ export function Habits({
               <div className="section-heading">
                 <span className="streak">
                   <Flame size={16} />
-                  {streak(dates, day)} {tr.streak}
+                  {progress.streak}{" "}
+                  {h.data.frequency === "weekly" ? tr.weekStreak : tr.streak}
                 </span>
                 <button
+                  disabled={
+                    !progress.scheduled ||
+                    (done &&
+                      !logs.some(
+                        (l) =>
+                          l.data.habitId === h.id &&
+                          l.data.date === day &&
+                          l.data.count > 0,
+                      ))
+                  }
                   className={`button ${done ? "secondary" : "primary"}`}
                   onClick={() => void toggle(h)}
                 >
@@ -90,6 +114,10 @@ export function Habits({
                   {done ? tr.doneToday : tr.checkHabit}
                 </button>
               </div>
+              <p className="muted">
+                {h.data.frequency === "weekly" ? tr.weeklyProgress : tr.today}:{" "}
+                {progress.current}/{progress.target} {h.data.unit}
+              </p>
               {h.data.notes && <p className="muted">{h.data.notes}</p>}
             </article>
           );

@@ -20,7 +20,8 @@ import {
   Empty,
   ExternalLink,
 } from "./components";
-import { Backup, download, type Edit } from "./features";
+import { Backup, download } from "./features/backup";
+import type { Edit } from "./features/types";
 import { NotificationLog } from "./notification-log";
 export function Settings({ store, edit }: { store: LifeStore; edit: Edit }) {
   const [email, setEmail] = useState(""),
@@ -74,6 +75,7 @@ export function Settings({ store, edit }: { store: LifeStore; edit: Edit }) {
           </div>
         </dl>
         <p className="muted">{tr.version}</p>
+        {native && <p className="muted">{tr.globalCapture}</p>}
       </Section>
       <Section
         title={tr.notifications}

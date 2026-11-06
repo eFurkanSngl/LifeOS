@@ -1,4 +1,59 @@
 import { test, expect } from "@playwright/test";
+test("protects dirty forms from accidental dismissal", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "İlk görevini ekle" }).click();
+  await page.getByLabel("Başlık *").fill("Korunacak taslak");
+  await page.keyboard.press("Escape");
+  await expect(
+    page
+      .getByText(
+        "Kaydedilmemiş değişiklikler var. Değişikliklerden vazgeçilsin mi?",
+        { exact: true },
+      )
+      .first(),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Düzenlemeye devam et" }).click();
+  await expect(page.getByLabel("Başlık *")).toHaveValue("Korunacak taslak");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Vazgeç", exact: true })
+    .last()
+    .click();
+  await page
+    .getByRole("button", { name: "Değişikliklerden vazgeç", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+});
+test("previews markdown and persists a custom focus preset", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page
+    .getByRole("textbox", { name: "Aklımdakiler" })
+    .fill("Markdown notu");
+  await page.getByRole("button", { name: "Notu yakala" }).click();
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: "Fikirler & notlar" })
+    .click();
+  await page
+    .getByRole("textbox", { name: "Not", exact: true })
+    .fill("# Güvenli önizleme\n**Önemli**");
+  await page.getByRole("button", { name: "Önizleme", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Güvenli önizleme" }),
+  ).toBeVisible();
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: "Odak", exact: true })
+    .click();
+  await page.getByRole("spinbutton", { name: "Süre (dakika)" }).fill("37");
+  await page.getByRole("button", { name: "Süreyi favorilere ekle" }).click();
+  await page.reload();
+  await expect(
+    page.locator("#focus-duration option").filter({ hasText: "37 dk" }),
+  ).toHaveCount(1);
+});
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
   await expect(

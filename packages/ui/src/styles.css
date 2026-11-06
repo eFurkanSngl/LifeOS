@@ -2458,3 +2458,69 @@ main {
 .dashboard-main .empty {
   padding: 20px 10px;
 }
+.workspace {
+  position: relative;
+}
+.workspace-resize {
+  position: absolute;
+  left: -4px;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  cursor: col-resize;
+  touch-action: none;
+}
+.workspace-resize:hover,
+.workspace-resize:focus-visible {
+  background: var(--blue, #315ceb);
+  outline: none;
+}
+@media (min-width: 1201px) {
+  .content-layout {
+    grid-template-columns: minmax(0, 1fr) var(--workspace-width, 294px);
+  }
+}
+.markdown-preview {
+  min-height: 140px;
+  overflow-wrap: anywhere;
+}
+.markdown-preview p {
+  white-space: pre-wrap;
+  margin: 8px 0;
+}
+.markdown-preview pre {
+  margin: 0;
+  white-space: pre-wrap;
+  background: #0b0e13;
+  padding: 4px 10px;
+}
+.markdown-preview code {
+  font-family: monospace;
+  color: #a6bcff;
+}
+@media (max-width: 1200px) {
+  .workspace-resize {
+    display: none;
+  }
+}
+.planner.day .planner-day {
+  position: relative;
+  min-height: 1240px;
+}
+.time-drop-grid {
+  margin-top: 14px;
+}
+.time-drop-slot {
+  display: block;
+  width: 100%;
+  height: 48px;
+  text-align: left;
+  border: 0;
+  border-top: 1px solid #252c39;
+  background: transparent;
+  color: #8f9bad;
+  font-size: 11px;
+}
+.time-drop-slot:hover {
+  background: #315ceb18;
+}

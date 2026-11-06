@@ -17,6 +17,23 @@ export function FocusPanel({
     [duration, setDuration] = useState(25),
     [taskId, setTaskId] = useState(""),
     [now, setNow] = useState(Date.now());
+  const [presets, setPresets] = useState<number[]>([15, 25, 45, 60, 90]);
+  useEffect(() => {
+    try {
+      const values: unknown = JSON.parse(
+        localStorage.getItem("lifeos-focus-presets") ?? "null",
+      );
+      if (
+        Array.isArray(values) &&
+        values.length &&
+        values.length <= 12 &&
+        values.every((n) => Number.isInteger(n) && n >= 1 && n <= 180)
+      )
+        setPresets(values);
+    } catch {
+      /* A damaged preference never prevents focus sessions. */
+    }
+  }, []);
   useEffect(() => {
     if (!active) return;
     const timer = setInterval(() => setNow(Date.now()), 500);
@@ -44,6 +61,7 @@ export function FocusPanel({
     seconds = Math.floor((ms % 60000) / 1000);
   const start = async () => {
     if (active) return;
+    if (!Number.isInteger(duration) || duration < 1 || duration > 180) return;
     const task = entities(store.records, "task").find((t) => t.id === taskId);
     await store.save("focus", {
       title: task?.data.title ?? tr.focus,
@@ -104,7 +122,7 @@ export function FocusPanel({
             value={duration}
             onChange={(e) => setDuration(Number(e.target.value))}
           >
-            {[15, 25, 45, 60, 90].map((n) => (
+            {presets.map((n) => (
               <option key={n} value={n}>
                 {n} dk
               </option>
@@ -134,6 +152,30 @@ export function FocusPanel({
                 </option>
               ))}
           </select>
+          <button
+            className="text-button"
+            disabled={
+              !Number.isInteger(duration) ||
+              duration < 1 ||
+              duration > 180 ||
+              presets.includes(duration) ||
+              presets.length >= 12
+            }
+            onClick={() => {
+              const next = [...presets, duration].sort((a, b) => a - b);
+              setPresets(next);
+              try {
+                localStorage.setItem(
+                  "lifeos-focus-presets",
+                  JSON.stringify(next),
+                );
+              } catch {
+                store.setError(tr.draftStorageError);
+              }
+            }}
+          >
+            {tr.presetSave}
+          </button>
         </div>
       )}
       <div className="focus-actions">

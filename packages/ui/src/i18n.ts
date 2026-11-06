@@ -287,6 +287,18 @@ export const tr = {
   series: "Tekrar serileri",
   quiet: "Sessiz saatlerde bekletilir",
   installHint: "Masaüstü kurulumu ve test durumu README dosyasında.",
+  preview: "Önizleme",
+  write: "Düzenle",
+  weekStreak: "haftalık seri",
+  weeklyProgress: "Bu haftaki hedef",
+  discardDraft:
+    "Kaydedilmemiş değişiklikler var. Değişikliklerden vazgeçilsin mi?",
+  discard: "Değişikliklerden vazgeç",
+  keepEditing: "Düzenlemeye devam et",
+  resizeWorkspace: "Çalışma alanı genişliği",
+  presetSave: "Süreyi favorilere ekle",
+  globalCapture: "Global hızlı ekleme: Ctrl+Shift+A",
+  calendarKeyboard: "Alt ve yön tuşları: 15 dakika veya bir gün taşı",
 } as const;
 export type TranslationKey = keyof typeof tr;
 export function label(key: string) {

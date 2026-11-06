@@ -10,7 +10,7 @@ import {
   Ellipsis,
   Inbox,
 } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { type Entity, type Kind, entities } from "./types";
 import {
   schemas,
@@ -23,6 +23,8 @@ import {
 } from "@lifeos/core";
 import { tr, label } from "./i18n";
 import { openLink } from "./native";
+import { invoke, isTauri } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import type { LifeStore } from "./store";
 
 export function Modal({
@@ -447,6 +449,59 @@ export function RecordForm({
     ),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
+  const draftSignature = JSON.stringify([
+    form,
+    repeat,
+    interval,
+    until,
+    weekdays,
+    remind,
+  ]);
+  const initialSignature = useRef(draftSignature);
+  const dirty = draftSignature !== initialSignature.current;
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
+  const closingApp = useRef(false);
+  useEffect(() => {
+    if (!isTauri()) return;
+    void invoke("set_form_dirty", { dirty: dirty || busy }).catch((e) =>
+      store.setError(String(e)),
+    );
+    return () => {
+      void invoke("set_form_dirty", { dirty: false });
+    };
+  }, [dirty, busy]);
+  useEffect(() => {
+    if (!isTauri()) return;
+    let active = true;
+    let stop: (() => void) | undefined;
+    void listen("confirm-form-close", () => {
+      closingApp.current = true;
+      setConfirmDiscard(true);
+    }).then((dispose) => {
+      if (active) stop = dispose;
+      else dispose();
+    });
+    return () => {
+      active = false;
+      stop?.();
+    };
+  }, []);
+  const requestClose = () => {
+    if (!busy) {
+      if (dirty) setConfirmDiscard(true);
+      else onClose();
+    }
+  };
+  useEffect(() => {
+    const protect = (event: BeforeUnloadEvent) => {
+      if (dirty) {
+        event.preventDefault();
+        event.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", protect);
+    return () => window.removeEventListener("beforeunload", protect);
+  }, [dirty]);
   const update = (key: string, value: unknown) =>
     setForm((f) => ({ ...f, [key]: value }));
   const submit = async (e: React.FormEvent) => {
@@ -547,7 +602,7 @@ export function RecordForm({
   return (
     <Modal
       title={`${record ? tr.edit : tr.new} · ${label(kind === "task" ? "tasks" : kind === "project" ? "projects" : kind === "habit" ? "habits" : kind === "note" ? "ideas" : kind === "contact" ? "contacts" : kind === "application" ? "applications" : kind === "shortcut" ? "chatgpt" : kind)}`}
-      onClose={onClose}
+      onClose={requestClose}
     >
       <form onSubmit={(e) => void submit(e)} className="record-form">
         <div className="form-grid">
@@ -711,7 +766,11 @@ export function RecordForm({
           </p>
         )}
         <div className="form-actions">
-          <button type="button" className="button secondary" onClick={onClose}>
+          <button
+            type="button"
+            className="button secondary"
+            onClick={requestClose}
+          >
             {tr.cancel}
           </button>
           <button className="button primary" disabled={busy}>
@@ -719,6 +778,36 @@ export function RecordForm({
           </button>
         </div>
       </form>
+      {confirmDiscard && (
+        <Modal
+          title={tr.discardDraft}
+          onClose={() => {
+            closingApp.current = false;
+            setConfirmDiscard(false);
+          }}
+        >
+          <div className="form-actions">
+            <button
+              className="button secondary"
+              onClick={() => {
+                closingApp.current = false;
+                setConfirmDiscard(false);
+              }}
+            >
+              {tr.keepEditing}
+            </button>
+            <button
+              className="button danger"
+              onClick={() => {
+                onClose();
+                if (closingApp.current) void invoke("close_after_discard");
+              }}
+            >
+              {tr.discard}
+            </button>
+          </div>
+        </Modal>
+      )}
     </Modal>
   );
 }

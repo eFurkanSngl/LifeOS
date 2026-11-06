@@ -38,12 +38,14 @@ export function Planner({ store, edit }: { store: LifeStore; edit: Edit }) {
       !t.data.archived &&
       !["cancelled", "skipped"].includes(t.data.status),
   );
-  const move = async (id: string, day: string) => {
+  const move = async (id: string, day: string, time?: string) => {
     const t = tasks.find((t) => t.id === id);
     if (!t) return;
-    const hour = t.data.scheduledAt
-      ? formatTime(t.data.scheduledAt, store.settings.timezone)
-      : "09:00";
+    const hour =
+      time ??
+      (t.data.scheduledAt
+        ? formatTime(t.data.scheduledAt, store.settings.timezone)
+        : "09:00");
     await store.save(
       "task",
       {
@@ -113,6 +115,7 @@ export function Planner({ store, edit }: { store: LifeStore; edit: Edit }) {
           </button>
         </div>
       </div>
+      <p className="muted">{tr.calendarKeyboard}</p>
       <div className={`planner ${view}`}>
         {days.map((day) => {
           const entries = tasks
@@ -170,6 +173,49 @@ export function Planner({ store, edit }: { store: LifeStore; edit: Edit }) {
                   )}
                 </div>
               )}
+              {view === "day" && (
+                <div className="time-drop-grid">
+                  {Array.from({ length: 24 }, (_, hour) => (
+                    <button
+                      type="button"
+                      className="time-drop-slot"
+                      key={hour}
+                      aria-label={`${day} ${String(hour).padStart(2, "0")}:00`}
+                      onClick={() =>
+                        edit("task", undefined, {
+                          scheduledAt: localInstant(
+                            `${day}T${String(hour).padStart(2, "0")}:00`,
+                            store.settings.timezone,
+                          ),
+                          status: "planned",
+                        })
+                      }
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const quarter = Math.max(
+                          0,
+                          Math.min(
+                            3,
+                            Math.floor(
+                              ((e.clientY - rect.top) / rect.height) * 4,
+                            ),
+                          ),
+                        );
+                        void move(
+                          e.dataTransfer.getData("text/plain"),
+                          day,
+                          `${String(hour).padStart(2, "0")}:${String(quarter * 15).padStart(2, "0")}`,
+                        );
+                      }}
+                    >
+                      {String(hour).padStart(2, "0")}:00
+                    </button>
+                  ))}
+                </div>
+              )}
               {entries.map((t) => (
                 <button
                   draggable
@@ -178,7 +224,64 @@ export function Planner({ store, edit }: { store: LifeStore; edit: Edit }) {
                   }
                   onClick={() => edit("task", t)}
                   key={t.id}
+                  style={
+                    view === "day"
+                      ? {
+                          position: "absolute",
+                          left: 76,
+                          right: 14,
+                          top:
+                            78 +
+                            (Number(
+                              formatTime(
+                                t.data.scheduledAt!,
+                                store.settings.timezone,
+                              ).slice(0, 2),
+                            ) *
+                              60 +
+                              Number(
+                                formatTime(
+                                  t.data.scheduledAt!,
+                                  store.settings.timezone,
+                                ).slice(3),
+                              )) *
+                              0.8,
+                          minHeight: t.data.duration * 0.8,
+                          width: "auto",
+                          zIndex: 2,
+                        }
+                      : undefined
+                  }
                   className={`schedule-block ${t.data.status === "completed" ? "is-done" : ""}`}
+                  onKeyDown={(e) => {
+                    if (
+                      !e.altKey ||
+                      ![
+                        "ArrowUp",
+                        "ArrowDown",
+                        "ArrowLeft",
+                        "ArrowRight",
+                      ].includes(e.key)
+                    )
+                      return;
+                    e.preventDefault();
+                    const at = new Date(t.data.scheduledAt!);
+                    at.setTime(
+                      at.getTime() +
+                        ({
+                          ArrowUp: -15,
+                          ArrowDown: 15,
+                          ArrowLeft: -1440,
+                          ArrowRight: 1440,
+                        }[e.key] ?? 0) *
+                          60000,
+                    );
+                    void move(
+                      t.id,
+                      today(store.settings.timezone, at),
+                      formatTime(at.toISOString(), store.settings.timezone),
+                    );
+                  }}
                 >
                   <small>
                     {formatTime(t.data.scheduledAt!, store.settings.timezone)} ·{" "}

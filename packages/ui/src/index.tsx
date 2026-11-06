@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import {
   LayoutDashboard,
   CalendarDays,
@@ -26,7 +26,6 @@ import {
   BookOpen,
   Code2,
 } from "lucide-react";
-import { motion, MotionConfig } from "motion/react";
 import { type Entity, type Kind, entities, SETTINGS_ID } from "@lifeos/core";
 import { isTauri } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
@@ -34,16 +33,29 @@ import { tr, label } from "./i18n";
 import { useLife } from "./store";
 import { RecordForm, Modal } from "./components";
 import { Dashboard, Reminders } from "./dashboard";
-import {
-  TaskList,
-  Planner,
-  Projects,
-  Habits,
-  Career,
-  Ideas,
-  FocusPanel,
-  type Edit,
-} from "./features";
+import type { Edit } from "./features/types";
+import { WorkspaceResize } from "./workspace-resize";
+const TaskList = lazy(() =>
+  import("./features/tasks").then((m) => ({ default: m.TaskList })),
+);
+const Planner = lazy(() =>
+  import("./features/planner").then((m) => ({ default: m.Planner })),
+);
+const Projects = lazy(() =>
+  import("./features/projects").then((m) => ({ default: m.Projects })),
+);
+const Habits = lazy(() =>
+  import("./features/habits").then((m) => ({ default: m.Habits })),
+);
+const Career = lazy(() =>
+  import("./features/career").then((m) => ({ default: m.Career })),
+);
+const Ideas = lazy(() =>
+  import("./features/ideas").then((m) => ({ default: m.Ideas })),
+);
+const FocusPanel = lazy(() =>
+  import("./features/focus").then((m) => ({ default: m.FocusPanel })),
+);
 import { openLink } from "./native";
 import { Settings, Integrations } from "./settings";
 
@@ -86,6 +98,15 @@ export function LifeOS({
     if (!isTauri()) return;
     let active = true;
     let dispose: (() => void) | undefined;
+    let stopCapture: (() => void) | undefined;
+    void listen("quick-capture", () =>
+      setEditing((current) => current ?? { kind: "task" }),
+    )
+      .then((stop) => {
+        if (active) stopCapture = stop;
+        else stop();
+      })
+      .catch((error) => store.setError(String(error)));
     void listen<string>("open-reminder", async (event) => {
       try {
         const record = (await store.service().list()).find(
@@ -104,6 +125,7 @@ export function LifeOS({
     return () => {
       active = false;
       dispose?.();
+      stopCapture?.();
     };
   }, []);
   const navigate = (value: string) => {
@@ -201,7 +223,7 @@ export function LifeOS({
       </div>
     );
   return (
-    <MotionConfig reducedMotion="user">
+    <>
       <div
         className={`app-shell ${sidebar ? "" : "sidebar-collapsed"} ${workspace ? "" : "workspace-collapsed"}`}
       >
@@ -413,12 +435,7 @@ export function LifeOS({
                     ))}
                 </div>
               )}
-              <motion.div
-                key={page}
-                initial={false}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.15 }}
-              >
+              <Suspense fallback={<p className="muted">{tr.loading}</p>}>
                 {page === "dashboard" ? (
                   <Dashboard store={store} edit={edit} navigate={navigate} />
                 ) : page === "tasks" ? (
@@ -461,7 +478,7 @@ export function LifeOS({
                 ) : (
                   <Integrations store={store} edit={edit} search={search} />
                 )}
-              </motion.div>
+              </Suspense>
               <footer className="main-footer">
                 <span>
                   LifeOS <span className="muted">/ {tr.tagline}</span>
@@ -474,6 +491,7 @@ export function LifeOS({
             </main>
             {workspace && (
               <aside className="workspace">
+                <WorkspaceResize />
                 <div className="workspace-heading">
                   <h2>{tr.workspace}</h2>
                   <button
@@ -715,6 +733,6 @@ export function LifeOS({
           </div>
         )}
       </div>
-    </MotionConfig>
+    </>
   );
 }

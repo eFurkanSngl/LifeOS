@@ -73,6 +73,41 @@ export function overlaps(a: Task, b: Task) {
     y = Date.parse(b.scheduledAt);
   return x < y + b.duration * 60000 && y < x + a.duration * 60000;
 }
+// Weekly goals aggregate units across an ISO week; weekdays never break on weekends.
+export function habitProgress(
+  logs: { date: string; count: number }[],
+  day: string,
+  frequency: "daily" | "weekdays" | "weekly",
+  target: number,
+) {
+  const shift = (date: string, days: number) =>
+    new Date(Date.parse(date + "T12:00Z") + days * 86400000)
+      .toISOString()
+      .slice(0, 10);
+  const weekday = (date: string) => new Date(date + "T12:00Z").getUTCDay();
+  const monday = (date: string) => shift(date, -((weekday(date) + 6) % 7));
+  const counts = new Map<string, number>();
+  for (const log of logs.filter((l) => l.date <= day)) {
+    const key = frequency === "weekly" ? monday(log.date) : log.date;
+    counts.set(key, (counts.get(key) ?? 0) + log.count);
+  }
+  let cursor = frequency === "weekly" ? monday(day) : day;
+  const current = counts.get(cursor) ?? 0;
+  const previous = (date: string): string => {
+    let value = shift(date, frequency === "weekly" ? -7 : -1);
+    while (frequency === "weekdays" && [0, 6].includes(weekday(value)))
+      value = shift(value, -1);
+    return value;
+  };
+  const scheduled = frequency !== "weekdays" || ![0, 6].includes(weekday(day));
+  if (!scheduled || current < target) cursor = previous(cursor);
+  let streak = 0;
+  while ((counts.get(cursor) ?? 0) >= target) {
+    streak++;
+    cursor = previous(cursor);
+  }
+  return { current, target, streak, scheduled, done: current >= target };
+}
 // Bounded calendar expansion; each occurrence has its own deterministic UUID and state.
 export function occurrenceId(seriesId: string, date: string) {
   const hex = date.replaceAll("-", "");
