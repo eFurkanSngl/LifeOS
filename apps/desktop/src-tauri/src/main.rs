@@ -146,6 +146,7 @@ fn test_notification(app: tauri::AppHandle) -> Result<(), String> {
         .builder()
         .title("LifeOS bildirim testi")
         .body("Bu bildirimi gördüysen Windows teslimi çalışıyor.")
+        .sound("Default")
         .show()
         .map_err(|e| e.to_string())
 }
