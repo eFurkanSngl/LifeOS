@@ -27,10 +27,12 @@ export function Reminders({
   store,
   edit,
   history = false,
+  full = false,
 }: {
   store: LifeStore;
   edit: Edit;
   history?: boolean;
+  full?: boolean;
 }) {
   const reminders = entities(store.records, "reminder")
     .filter((r) =>
@@ -75,7 +77,7 @@ export function Reminders({
   return (
     <div className="reminders-list">
       {reminders.length ? (
-        reminders.slice(0, history ? 100 : 8).map((r) => {
+        (full ? reminders : reminders.slice(0, history ? 100 : 8)).map((r) => {
           const diff = Math.ceil(
             (Date.parse(r.data.fireAt) - Date.now()) / 60000,
           );

@@ -140,6 +140,30 @@ test("shows an exam on both dates without assigning an invented time and creates
     page.getByText("Independent reminder", { exact: true }),
   ).toBeVisible();
 });
+test("lists more than eight independent reminders on the dedicated page", async ({
+  page,
+}) => {
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: "Hatırlatıcılar", exact: true })
+    .click();
+  for (let i = 1; i <= 9; i++) {
+    await page
+      .getByRole("main")
+      .getByRole("button", { name: "Yeni ekle", exact: true })
+      .first()
+      .click();
+    await page.getByLabel("Başlık *").fill(`Reminder ${i}`);
+    await page.getByLabel("Hatırlatma zamanı *").fill("2026-12-04T18:00");
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Kaydet", exact: true })
+      .click();
+    await expect(page.getByRole("dialog")).not.toBeVisible();
+  }
+  await expect(page.locator(".reminder-row")).toHaveCount(9);
+  await expect(page.getByText("Reminder 9", { exact: true })).toBeVisible();
+});
 test("moves a calendar task to a quarter-hour slot and persists it", async ({
   page,
 }) => {

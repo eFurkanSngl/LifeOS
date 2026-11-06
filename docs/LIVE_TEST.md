@@ -38,5 +38,7 @@ Web ve iki istemci testi ertelendi. Yeni native pakette aşağıdaki testleri s�
 - [ ] Sağ panel kenarı fare/klavyeyle değişiyor, yeniden açınca genişlik korunuyor.
 - [ ] Takvim gün görünümünde 15 dakikalık sürükleme ve Alt+yön tuşlarıyla taşıma çalışıyor.
 - [ ] Anadolu dersleri: 7 Kasım 13:00, 11 Kasım 20:00, 12 Kasım 20:00, 13 Kasım 18:00 ve 19:00, Europe/Istanbul. Uyarılar 30 dakika önce ve sesli.
+- [ ] Gerçek PDF sayaçları başlangıçta 0/8. Kendi çalışmanı tamamladığında +/− veya Düzenle ile güncelle; yeniden açınca sayı korunmalı.
+- [ ] Sınav / PDF / Canlı ders filtresi ve ayrı Hatırlatıcılar sayfası. Sınav aralıkları saat uydurmadan ilgili günlerde; hazırlık uyarıları bir gün önce 18.00.
 
 Yalnızca geçmeyen adımı, beklenen/gerçek davranışı ve gizli bilgi içermeyen görüntüyü bildir. Geçmeyen madde açık kalır.

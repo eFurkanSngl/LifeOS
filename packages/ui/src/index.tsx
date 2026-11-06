@@ -455,7 +455,12 @@ export function LifeOS({
                         {history ? tr.reminders : tr.notificationHistory}
                       </button>
                     </div>
-                    <Reminders store={store} edit={edit} history={history} />
+                    <Reminders
+                      store={store}
+                      edit={edit}
+                      history={history}
+                      full
+                    />
                   </>
                 ) : page === "projects" ? (
                   <Projects store={store} edit={edit} search={search} />

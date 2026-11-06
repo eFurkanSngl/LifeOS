@@ -37,9 +37,11 @@ Markdown başlık, liste, kalın metin ve kodu destekler. HTML çalıştırmaz v
 
 Anadolu eKampüs’te görünen beş ileri tarihli oturum kaynak başlangıç/bitiş saatleriyle aktarıldı. Her biri **30 dakika önce sesli uyarır**. Aktarım öncesi yerel yedek alındı. Aktarım tek seferliktir; program değişikliklerini otomatik izlemez. Uyarının gerçek ders saatindeki teslimi ayrıca canlı test gerektirir.
 
-## Codex’ten not ve görev ekleme
-
 Görevler’de **Ders ekle**, **Sınav tarihi ekle**, **PDF takibi ekle** ve **Hatırlatıcı ekle** düğmeleri vardır. PDF ilerlemesi tamamlanan/toplam ünite olarak tutulur; +/− ile değiştirilir. Sınav aralıkları tüm gün kaydıdır: kişisel oturum saati bilinmeden saat üretilmez. Bağımsız uyarılar **Hatırlatıcılar** sayfasından düzenlenir.
+
+Ayrıntılar: [Eğitim kayıtları](docs/EDUCATION.md).
+
+## Codex’ten not ve görev ekleme
 
 Yerel **MCP sunucusu** 12 sınırlı araç sunar. Bağlantı kurulduktan sonra istemciye “LifeOS’a bu görüşmenin notunu ekle” veya açık tarih/saatle görev oluşturma talebi verilebilir.
 
@@ -51,7 +53,7 @@ Web yayını ve ücretli API gerekmez. ChatGPT desteği kullanılan istemcinin y
 
 ## Doğrulama ve sınırlar
 
-**66 otomatik test, 18 tarayıcı akışı**, TypeScript, lint ve üretim derlemeleri geçti. Native kontrol/test/paket sonucu Actions’ta ayrıca izlenir. Önceki kurulu pakette gerçek bulut girişi, masaüstü→Supabase→masaüstü aktarımı, temiz yeniden başlatmada oturum/kayıt korunumu ve tek arka plan gönderimi doğrulandı. Kullanıcı bildirim ve sesin çalıştığını doğruladı.
+**66 otomatik test, 19 tarayıcı akışı**, TypeScript, lint ve üretim derlemeleri geçti. Native kontrol/test/paket sonucu Actions’ta ayrıca izlenir. Önceki kurulu pakette gerçek bulut girişi, masaüstü→Supabase→masaüstü aktarımı, temiz yeniden başlatmada oturum/kayıt korunumu ve tek arka plan gönderimi doğrulandı. Kullanıcı bildirim ve sesin çalıştığını doğruladı.
 
 Yeni global kısayol ve native form kapatma koruması dahil [canlı test listesi](docs/LIVE_TEST.md) henüz bütünüyle kapanmış değildir. Uyku/çökme/tepsi ve toast eylemlerinin tam matrisi açıktır. Ana JS yaklaşık 744 kB’den 615 kB’ye indi; bu RAM ölçümü değildir. **60–120 MiB bellek hedefi henüz sağlandı diye raporlanmıyor.**
 
