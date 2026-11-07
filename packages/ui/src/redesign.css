@@ -184,6 +184,11 @@ main {
 .shortcut,
 .session-link {
   border-radius: 10px;
+  color: var(--text);
+}
+.shortcut:hover,
+.task-main > span {
+  color: var(--text);
 }
 .shortcut:hover,
 .session-link:hover,
