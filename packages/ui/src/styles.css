@@ -2558,3 +2558,14 @@ main {
     gap: 6px;
   }
 }
+.chat-session-title {
+  min-width: 0;
+  flex: 1;
+}
+.chat-session-title > span {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}

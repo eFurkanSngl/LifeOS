@@ -538,7 +538,7 @@ export function LifeOS({
                   </div>
                   <p>{tr.shortcutsHint}</p>
                   <div className="shortcut-list">
-                    {shortcuts.map((s) => {
+                    {shortcuts.slice(0, 8).map((s) => {
                       const Icon =
                         s.data.icon === "code"
                           ? Code2
@@ -564,6 +564,14 @@ export function LifeOS({
                         </a>
                       );
                     })}
+                    {shortcuts.length > 8 && (
+                      <button
+                        className="text-button"
+                        onClick={() => navigate("integrations")}
+                      >
+                        {tr.allChats} ({shortcuts.length})
+                      </button>
+                    )}
                     {!shortcuts.length && (
                       <button
                         className="workspace-empty"
@@ -590,7 +598,7 @@ export function LifeOS({
                     </button>
                   </div>
                   <p>{tr.codexHint}</p>
-                  {sessions.map((s) => (
+                  {sessions.slice(0, 8).map((s) => (
                     <button
                       key={s.id}
                       className="session-link"
@@ -599,8 +607,8 @@ export function LifeOS({
                       <span className="terminal-mark">
                         <Terminal size={16} />
                       </span>
-                      <span>
-                        {s.data.title}
+                      <span title={s.data.title} className="chat-session-title">
+                        <span>{s.data.title}</span>
                         <small>
                           {entities(store.records, "project").find(
                             (p) => p.id === s.data.projectId,
@@ -610,6 +618,14 @@ export function LifeOS({
                       <ArrowUpRight size={14} />
                     </button>
                   ))}
+                  {sessions.length > 8 && (
+                    <button
+                      className="text-button"
+                      onClick={() => navigate("integrations")}
+                    >
+                      {tr.allChats} ({sessions.length})
+                    </button>
+                  )}
                   {!sessions.length && (
                     <button
                       className="workspace-empty"

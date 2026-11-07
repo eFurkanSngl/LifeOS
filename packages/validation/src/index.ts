@@ -228,7 +228,7 @@ export const shortcutSchema = z
   .strict();
 export const codexSchema = z
   .object({
-    title,
+    title: z.string().trim().min(1, "Başlık gerekli.").max(2000),
     reference: z.string().trim().min(1).max(2000),
     url: safeUrl.optional(),
     projectId: optionalId,

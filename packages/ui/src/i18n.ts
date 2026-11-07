@@ -308,6 +308,13 @@ export const tr = {
   newReminder: "Hatırlatıcı ekle",
   taskKindFilter: "Kayıt türüne göre filtrele",
   studyUnit: "ünite",
+  allChats: "Tüm sohbetleri gör",
+  moreChats: "Daha fazla sohbet göster",
+  chatCount: "sohbet",
+  importedChatHint:
+    "Aktarılan başlıklar ve bağlantılar. Yeni sohbetler kendiliğinden eşitlenmez.",
+  codexHistoryHint:
+    "Oturum referansı ve kayıtlı notlar. Özgün oturuma Codex içinden veya codex resume komutuyla erişebilirsin.",
   invalidStudyProgress:
     "Tamamlanan ünite toplamı aşamaz. PDF takibi için toplam ünite girin.",
   invalidDateRange:

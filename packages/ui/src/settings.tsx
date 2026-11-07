@@ -318,6 +318,8 @@ export function Integrations({
   edit: Edit;
   search: string;
 }) {
+  const [chatLimit, setChatLimit] = useState(40);
+  const [sessionLimit, setSessionLimit] = useState(40);
   const shortcuts = entities(store.records, "shortcut")
       .filter((s) =>
         s.data.title
@@ -329,7 +331,11 @@ export function Integrations({
           Number(b.data.pinned) - Number(a.data.pinned) ||
           a.data.order - b.data.order,
       ),
-    sessions = entities(store.records, "codex");
+    sessions = entities(store.records, "codex").filter((s) =>
+      `${s.data.title} ${s.data.reference}`
+        .toLocaleLowerCase("tr")
+        .includes(search.toLocaleLowerCase("tr")),
+    );
   return (
     <>
       <div className="provider-grid">
@@ -350,7 +356,7 @@ export function Integrations({
       </div>
       <Section
         title={tr.chatgpt}
-        sub={tr.shortcutsHint}
+        sub={tr.importedChatHint}
         action={
           <button className="button secondary" onClick={() => edit("shortcut")}>
             {tr.new}
@@ -358,7 +364,7 @@ export function Integrations({
         }
       >
         {shortcuts.length ? (
-          shortcuts.map((s) => (
+          shortcuts.slice(0, chatLimit).map((s) => (
             <div className="simple-row" key={s.id}>
               <span className={`shortcut-dot ${s.data.color}`} />
               <ExternalLink url={s.data.url}>{s.data.title}</ExternalLink>
@@ -371,20 +377,34 @@ export function Integrations({
           <Empty action={() => edit("shortcut")} />
         )}
       </Section>
+      <div className="toolbar">
+        <span>
+          {Math.min(chatLimit, shortcuts.length)} / {shortcuts.length}{" "}
+          {tr.chatCount}
+        </span>
+        {shortcuts.length > chatLimit && (
+          <button
+            className="button secondary"
+            onClick={() => setChatLimit((n) => n + 40)}
+          >
+            {tr.moreChats}
+          </button>
+        )}
+      </div>
       <Section
         title={tr.codex}
-        sub={tr.noAuto}
+        sub={tr.codexHistoryHint}
         action={
           <button className="button secondary" onClick={() => edit("codex")}>
             {tr.new}
           </button>
         }
       >
-        {sessions.map((s) => (
+        {sessions.slice(0, sessionLimit).map((s) => (
           <div className="simple-row" key={s.id}>
             <Terminal size={17} />
-            <span>
-              {s.data.title}
+            <span className="chat-session-title" title={s.data.title}>
+              <span>{s.data.title}</span>
               <small>{s.data.reference}</small>
             </span>
             {s.data.url && (
@@ -396,6 +416,20 @@ export function Integrations({
         ))}
         {!sessions.length && <Empty action={() => edit("codex")} />}
       </Section>
+      <div className="toolbar">
+        <span>
+          {Math.min(sessionLimit, sessions.length)} / {sessions.length}{" "}
+          {tr.chatCount}
+        </span>
+        {sessions.length > sessionLimit && (
+          <button
+            className="button secondary"
+            onClick={() => setSessionLimit((n) => n + 40)}
+          >
+            {tr.moreChats}
+          </button>
+        )}
+      </div>
     </>
   );
 }

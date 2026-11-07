@@ -1,4 +1,86 @@
 import { test, expect } from "@playwright/test";
+test("bounds large chat histories and searches both providers", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open("lifeos-v1", 1);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const tx = db.transaction("records", "readwrite");
+    for (let i = 0; i < 90; i++) {
+      for (const kind of ["shortcut", "codex"]) {
+        tx.objectStore("records").put({
+          id: crypto.randomUUID(),
+          kind,
+          version: 1,
+          cloudVersion: 0,
+          dirty: true,
+          deleted: false,
+          updatedAt: new Date().toISOString(),
+          data:
+            kind === "shortcut"
+              ? {
+                  title: `Chat Thread ${i}`,
+                  url: `https://chatgpt.com/c/test-${i}`,
+                  color: "blue",
+                  icon: "chat",
+                  pinned: false,
+                  order: i,
+                }
+              : {
+                  title: `Codex Thread ${i}`,
+                  reference: `codex resume test-${i}`,
+                  notes: "Synthetic browser test record",
+                },
+        });
+      }
+    }
+    await new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+  });
+  await page.reload();
+  await expect(page.locator(".workspace-section .shortcut")).toHaveCount(8);
+  await expect(page.locator(".session-link")).toHaveCount(8);
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: "Entegrasyonlar", exact: true })
+    .click();
+  await expect(
+    page.getByRole("main").getByRole("link", { name: /^Chat Thread/ }),
+  ).toHaveCount(40);
+  await expect(
+    page
+      .getByRole("main")
+      .locator(".simple-row > span")
+      .filter({ hasText: /^Codex Thread/ }),
+  ).toHaveCount(40);
+  await page
+    .getByRole("main")
+    .getByRole("button", { name: "Daha fazla sohbet göster", exact: true })
+    .first()
+    .click();
+  await expect(
+    page.getByRole("main").getByRole("link", { name: /^Chat Thread/ }),
+  ).toHaveCount(80);
+  await page.getByPlaceholder("Çalışma alanında ara…").fill("Thread 89");
+  await expect(
+    page
+      .getByRole("main")
+      .getByRole("link", { name: "Chat Thread 89", exact: true }),
+  ).toHaveCount(1);
+  await expect(
+    page
+      .getByRole("main")
+      .locator(".simple-row")
+      .filter({ hasText: "Codex Thread 89" }),
+  ).toBeVisible();
+});
 test("protects dirty forms from accidental dismissal", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "İlk görevini ekle" }).click();
@@ -192,6 +274,7 @@ test("moves a calendar task to a quarter-hour slot and persists it", async ({
     page.locator(".schedule-block").filter({ hasText: "Quarter-hour task" }),
   ).toContainText("13:15");
   await page.reload();
+  await page.getByLabel("Tarih", { exact: true }).fill("2026-11-06");
   await expect(
     page.locator(".schedule-block").filter({ hasText: "Quarter-hour task" }),
   ).toContainText("13:15");

@@ -23,4 +23,10 @@ Tools: `lifeos_list_tasks`, `lifeos_get_task`, `lifeos_create_task`, `lifeos_upd
 
 Read before updating; pass `expectedVersion` for updates and completion. Scheduling arguments are explicit UTC instants, never ambiguous natural language. List tools cap results at 200. There is no delete tool and no arbitrary SQL/shell/filesystem tool. Task references must exist in LifeOS. Tool outcomes are recorded in the private SQLite audit table. Native notifications still require the desktop process even if MCP writes while it is closed.
 
-ChatGPT shortcuts launch their original HTTPS conversations. Codex entries store manual references and optional HTTPS links. Neither scrapes sessions, cookies, browser data or undocumented cloud APIs, and neither claims access to all account chats. Automatic discovery and Codex deep-link launching are intentionally not implemented.
+ChatGPT shortcuts launch their original HTTPS conversations. Codex entries store session references, optional HTTPS links and notes. A user-authorized history index can also be imported through the connected desktop app's official history tools, including archived Codex sessions. This imports titles and links/references; full messages remain in their source application. No sessions, cookies, browser databases or undocumented cloud APIs are scraped. Automatic ongoing discovery and Codex desktop deep-link launching are not implemented.
+
+## Local setup verified on 7 November 2026
+
+The `lifeos` stdio entry was added to the user's Codex config after taking a private backup. It uses the installed Node executable, absolute tsx/server/tsconfig paths and the actual existing native SQLite database. App MCP opt-in is enabled. A real SDK client connected, discovered twelve tools, listed tasks, wrote a setup note through `lifeos_add_note` and retrieved it through `lifeos_list_notes`. No API key or public HTTP endpoint was needed. The current chat may need a client restart/new session before its tool inventory includes the new server.
+
+Large history lists show forty entries at a time in Integrations with search and a load-more button; the right workspace panel shows eight from each provider. Source titles remain stored in full. Codex references use `codex resume <session-id>`; they are not claimed to be working desktop deep links.
