@@ -92,3 +92,9 @@ supabase              Şema ve migration
 [Kurulum](docs/SETUP.md) · [Canlı test](docs/LIVE_TEST.md) · [Native doğrulama](docs/NATIVE_VERIFICATION.md) · [Bulut](docs/CLOUD_VERIFICATION.md) · [Mimari](docs/ARCHITECTURE.md) · [Güvenlik](docs/SECURITY.md) · [Kalanlar](docs/ROADMAP.md)
 
 Yedekler kişisel kayıt içerir; özel sakla. Auth parolaları kayıt yedeklerine konmaz. Depo özeldir; açık kaynak lisansı verilmemiştir.
+
+## Son kurulum durumu — 7 Kasım 2026
+
+`2501368` Windows paketi kuruldu. Yerel veride 5 canlı ders, **tamamı 0/8 olan 5 PDF**, 5 sınav dönemi ve 4 sınav merkezi tercih son günü var. Akademik tarihler için **bir gün önce 18.00** saatinde 9 bağımsız hazırlık uyarısı oluşturuldu. Kesin kişisel sınav oturum saatleri henüz girilmedi. Canlı derslerin 30 dakika önceki sesli uyarı ayarları korundu.
+
+Ayrı Hatırlatıcılar sayfasındaki sekiz kayıt sınırı kaldırıldı. [Başarılı derleme](https://github.com/eFurkanSngl/LifeOS/actions/runs/42289599511) 66 otomatik test ve 19 tarayıcı akışını içerir. Son güncelleme sonrası veri kontrolü geçti; son paketin native ekran kontrolü masaüstü kontrol aracının oturum hatası nedeniyle açık. [Eğitim ayrıntıları](docs/EDUCATION.md).
