@@ -432,7 +432,7 @@ export function LifeOS({
                       (r) =>
                         !r.deleted &&
                         r.kind !== "settings" &&
-                        `${r.data.title ?? ""} ${r.data.body ?? ""} ${r.data.description ?? ""}`
+                        `${r.data.title ?? ""} ${r.data.body ?? ""} ${r.data.description ?? ""} ${r.data.notes ?? ""}`
                           .toLocaleLowerCase("tr")
                           .includes(search.toLocaleLowerCase("tr")),
                     )

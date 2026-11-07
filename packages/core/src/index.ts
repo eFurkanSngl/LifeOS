@@ -8,6 +8,7 @@ import {
   type Kind,
 } from "@lifeos/validation";
 export * from "@lifeos/validation";
+export { makeCodexReference } from "./conversations";
 export const SETTINGS_ID = "00000000-0000-4000-8000-000000000001";
 export function taskReminderId(taskId: string) {
   return (parseInt(taskId[0], 16) ^ 8).toString(16) + taskId.slice(1);

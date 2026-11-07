@@ -43,7 +43,7 @@ export function Integrations({
             a.data.order - b.data.order,
         ),
       sessions: entities(store.records, "codex").filter((s) =>
-        `${s.data.title} ${s.data.reference}`
+        `${s.data.title} ${s.data.reference} ${s.data.notes}`
           .toLocaleLowerCase("tr")
           .includes(query),
       ),

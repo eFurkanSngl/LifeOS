@@ -228,13 +228,33 @@ export const shortcutSchema = z
   .strict();
 export const codexSchema = z
   .object({
-    title: z.string().trim().min(1, "Başlık gerekli.").max(2000),
+    title,
     reference: z.string().trim().min(1).max(2000),
     url: safeUrl.optional(),
     projectId: optionalId,
     notes: text,
   })
   .strict();
+export const codexImportSchema = codexSchema
+  .extend({ title: z.string().trim().min(1).max(2000) })
+  .transform((value, ctx) => {
+    if (value.title.length <= 240) return value;
+    const sourceTitle = value.title;
+    const notes = `Özgün sohbet başlığı:\n${sourceTitle}\n\n${value.notes}`;
+    if (notes.length > 20000) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["notes"],
+        message: "Sohbet notu çok uzun.",
+      });
+      return z.NEVER;
+    }
+    return {
+      ...value,
+      title: `${sourceTitle.slice(0, 237).replace(/[\uD800-\uDBFF]$/, "")}...`,
+      notes,
+    };
+  });
 export const focusSchema = z
   .object({
     title,
@@ -360,7 +380,23 @@ export const backupSchema = z
   .object({
     schemaVersion: z.literal(1),
     exportedAt: instant,
-    records: z.array(recordSchema).max(100000),
+    records: z
+      .array(
+        z.preprocess((value) => {
+          if (
+            value &&
+            typeof value === "object" &&
+            "kind" in value &&
+            value.kind === "codex" &&
+            "data" in value
+          ) {
+            const imported = codexImportSchema.safeParse(value.data);
+            if (imported.success) return { ...value, data: imported.data };
+          }
+          return value;
+        }, recordSchema),
+      )
+      .max(100000),
   })
   .strict();
 export function validateData(

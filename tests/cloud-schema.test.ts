@@ -1,6 +1,7 @@
 import { PGlite } from "@electric-sql/pglite";
 import { beforeAll, afterAll, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
+import { makeCodexReference } from "../packages/core/src/conversations";
 let db: PGlite;
 const a = "11111111-1111-4111-8111-111111111111",
   b = "22222222-2222-4222-8222-222222222222",
@@ -45,6 +46,27 @@ async function push(
     ])
   ).rows[0].lifeos_push;
 }
+it("saves an imported long Codex title through the deployed title constraint", async () => {
+  await owner(a);
+  await db.exec("begin");
+  try {
+    const title = "Original conversation title ".repeat(60).trim();
+    const record = makeCodexReference(title, "codex resume session-id");
+    const result = await push(crypto.randomUUID(), record, 0, "codex");
+    expect(result.ok).toBe(true);
+    expect(result.record.data.notes).toContain(title);
+    await expect(
+      push(
+        crypto.randomUUID(),
+        { title: "x".repeat(241), reference: "session-id" },
+        0,
+        "codex",
+      ),
+    ).rejects.toThrow();
+  } finally {
+    await db.exec("rollback");
+  }
+});
 it("applies the complete schema and idempotent compare-and-swap protocol", async () => {
   await owner(a);
   const first = await push(task, { title: "Study", status: "planned" });
