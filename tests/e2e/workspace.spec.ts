@@ -80,6 +80,9 @@ test("bounds large chat histories and searches both providers", async ({
       .locator(".simple-row")
       .filter({ hasText: "Codex Thread 89" }),
   ).toBeVisible();
+  await page.setViewportSize({ width: 1440, height: 1100 });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: "docs/screenshots/chat-history-demo.png" });
 });
 test("protects dirty forms from accidental dismissal", async ({ page }) => {
   await page.goto("/");

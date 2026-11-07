@@ -43,17 +43,21 @@ Ayrıntılar: [Eğitim kayıtları](docs/EDUCATION.md).
 
 ## Codex’ten not ve görev ekleme
 
+![Sohbet araması — sentetik tarayıcı test verisiyle](docs/screenshots/chat-history-demo.png)
+
+Codex için yerel `lifeos` MCP kaydı kuruldu ve gerçek not yazma/okuma testi geçti. Entegrasyonlar ekranı ChatGPT bağlantıları ve Codex oturum referanslarını arar; sağ panel ilk sekizini, ana liste ilk kırkını gösterir. **Daha fazla sohbet göster** ile devam edilir. Yukarıdaki görüntü test kayıtları içerir; kişisel sohbet başlıkları depoya eklenmez. Geçmiş aktarımı başlık/bağlantı indeksidir; tam mesajlar özgün uygulamada kalır. Otomatik devamlı eşitleme ve Codex masaüstü deep-link desteği yoktur.
+
 Yerel **MCP sunucusu** 12 sınırlı araç sunar. Bağlantı kurulduktan sonra istemciye “LifeOS’a bu görüşmenin notunu ekle” veya açık tarih/saatle görev oluşturma talebi verilebilir.
 
 1. LifeOS Ayarlar’dan yerel MCP erişimini etkinleştirip kaydet.
 2. **Veritabanı yolu** düğmesiyle gerçek SQLite yolunu bul.
 3. [MCP rehberindeki](docs/MCP_INTEGRATION.md) stdio yapılandırmasını Codex’e ekleyip bağlantıyı yenile.
 
-Web yayını ve ücretli API gerekmez. ChatGPT desteği kullanılan istemcinin yerel MCP yeteneğine bağlıdır. Otomatik sohbet aktarımı yoktur. Kullanıcının Codex ayarları otomatik değiştirilmemiştir.
+Web yayını ve ücretli API gerekmez. ChatGPT desteği kullanılan istemcinin yerel MCP yeteneğine bağlıdır. Otomatik devamlı sohbet aktarımı yoktur. Bu kurulumda kullanıcının talebiyle Codex ayarlarına `lifeos` eklendi; diğer MCP kayıtları korundu.
 
 ## Doğrulama ve sınırlar
 
-**66 otomatik test, 19 tarayıcı akışı**, TypeScript, lint ve üretim derlemeleri geçti. Native kontrol/test/paket sonucu Actions’ta ayrıca izlenir. Önceki kurulu pakette gerçek bulut girişi, masaüstü→Supabase→masaüstü aktarımı, temiz yeniden başlatmada oturum/kayıt korunumu ve tek arka plan gönderimi doğrulandı. Kullanıcı bildirim ve sesin çalıştığını doğruladı.
+**67 otomatik test, 20 tarayıcı akışı**, TypeScript, lint ve üretim derlemeleri geçti. Native kontrol/test/paket sonucu Actions’ta ayrıca izlenir. Önceki kurulu pakette gerçek bulut girişi, masaüstü→Supabase→masaüstü aktarımı, temiz yeniden başlatmada oturum/kayıt korunumu ve tek arka plan gönderimi doğrulandı. Kullanıcı bildirim ve sesin çalıştığını doğruladı.
 
 Yeni global kısayol ve native form kapatma koruması dahil [canlı test listesi](docs/LIVE_TEST.md) henüz bütünüyle kapanmış değildir. Uyku/çökme/tepsi ve toast eylemlerinin tam matrisi açıktır. Ana JS yaklaşık 744 kB’den 615 kB’ye indi; bu RAM ölçümü değildir. **60–120 MiB bellek hedefi henüz sağlandı diye raporlanmıyor.**
 
@@ -98,3 +102,9 @@ Yedekler kişisel kayıt içerir; özel sakla. Auth parolaları kayıt yedekleri
 `2501368` Windows paketi kuruldu. Yerel veride 5 canlı ders, **tamamı 0/8 olan 5 PDF**, 5 sınav dönemi ve 4 sınav merkezi tercih son günü var. Akademik tarihler için **bir gün önce 18.00** saatinde 9 bağımsız hazırlık uyarısı oluşturuldu. Kesin kişisel sınav oturum saatleri henüz girilmedi. Canlı derslerin 30 dakika önceki sesli uyarı ayarları korundu.
 
 Ayrı Hatırlatıcılar sayfasındaki sekiz kayıt sınırı kaldırıldı. [Başarılı derleme](https://github.com/eFurkanSngl/LifeOS/actions/runs/42289599511) 66 otomatik test ve 19 tarayıcı akışını içerir. Son güncelleme sonrası veri kontrolü geçti; son paketin native ekran kontrolü masaüstü kontrol aracının oturum hatası nedeniyle açık. [Eğitim ayrıntıları](docs/EDUCATION.md).
+
+## Sohbet geçmişi ve MCP — 7 Kasım 2026
+
+Sohbet ekranını içeren `0bed913` paketi kuruldu. Kullanıcının isteğiyle tüm erişilebilir geçmişin indeksi aktarıldı: **1.280 ChatGPT bağlantısı + 181 Codex oturum referansı** (11'i arşivlenmiş). Tam mesaj içerikleri özgün uygulamada kalır. Tekrar aktarım 1.461 kaydı atladı; çoğaltma olmadı. Beş PDF sayacı 0/8 kaldı.
+
+MCP bu sohbetin gerçek araç listesinden de doğrulandı: kurulum notu ve mevcut görevler okunabildi. LifeOS'ta **Entegrasyonlar** sayfasını açıp üst aramayı kullan. ChatGPT bağlantısı özgün sohbeti açar; Codex kaydında oturum referansı bulunur. Sürekli otomatik sohbet eşitlemesi ve Codex masaüstü deep-link açma ayrıca geliştirilmelidir.
