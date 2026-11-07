@@ -1,4 +1,5 @@
 @import "tailwindcss";
 @import "./base.css";
 @import "./redesign.css";
+@import "./interactions.css";
 @source "./**/*.{ts,tsx}";

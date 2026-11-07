@@ -791,6 +791,7 @@ test("preserves a local note draft when another tab edits the same note", async 
     .getByRole("navigation")
     .getByRole("button", { name: "Fikirler & notlar" })
     .click();
+  await page.getByRole("button", { name: "Kartlar", exact: true }).click();
   const second = await context.newPage();
   await second.goto("/#ideas");
   await expect(

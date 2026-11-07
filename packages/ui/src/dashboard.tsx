@@ -144,6 +144,9 @@ export function Dashboard({
   edit: Edit;
   navigate: (page: string) => void;
 }) {
+  const [agendaView, setAgendaView] = useState<"timeline" | "tasks">(
+    "timeline",
+  );
   const zone = store.settings.timezone,
     day = today(zone),
     tasks = entities(store.records, "task").filter(
@@ -324,7 +327,46 @@ export function Dashboard({
               </button>
             }
           >
-            {timeline.length ? (
+            <div
+              className="agenda-view-switch"
+              role="group"
+              aria-label={tr.agendaView}
+            >
+              <button
+                aria-pressed={agendaView === "timeline"}
+                onClick={() => setAgendaView("timeline")}
+              >
+                <Clock3 size={14} />
+                {tr.timedPlan}
+                <small>{timeline.length}</small>
+              </button>
+              <button
+                aria-pressed={agendaView === "tasks"}
+                onClick={() => setAgendaView("tasks")}
+              >
+                <CheckCheck size={14} />
+                {tr.todayTasks}
+                <small>{daily.length}</small>
+              </button>
+            </div>
+            {agendaView === "tasks" ? (
+              <div className="agenda-task-list">
+                {daily.length ? (
+                  daily.map((t) => (
+                    <TaskRow
+                      key={t.id}
+                      task={t}
+                      store={store}
+                      onEdit={() => edit("task", t)}
+                    />
+                  ))
+                ) : (
+                  <Empty
+                    action={() => edit("task", undefined, { dueDate: day })}
+                  />
+                )}
+              </div>
+            ) : timeline.length ? (
               <div className="timeline">
                 {timeline.map((t) => (
                   <div className="timeline-entry" key={t.id}>

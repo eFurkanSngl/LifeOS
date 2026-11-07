@@ -1,4 +1,16 @@
 export const tr = {
+  agendaView: "Günlük plan görünümü",
+  timedPlan: "Saatli plan",
+  todayTasks: "Bugünkü görevler",
+  notesDesk: "Düşüncelerine çalışma alanı aç.",
+  notesDeskHint:
+    "Soldan bir not seç; yaz, önizle veya bir sonraki adıma dönüştür.",
+  notesLayout: "Not görünümü",
+  notesDeskView: "Çalışma masası",
+  notesCardsView: "Kartlar",
+  noteCategoryFilter: "Not kategorisi",
+  noteSelection: "Not seçimi",
+  noteEmptyBody: "Bu nota ilk düşünceni ekle.",
   dispatchSubmitted: "Gönderim istendi",
   dispatchFailed: "Gönderilemedi",
   dispatchUncertain: "Sonuç belirsiz",

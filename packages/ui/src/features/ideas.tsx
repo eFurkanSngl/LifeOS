@@ -1,11 +1,17 @@
-import { useEffect, useRef, useState } from "react";
-import { Pin } from "lucide-react";
-import { entities, type TypedEntity } from "@lifeos/core";
+import { useState } from "react";
+import {
+  Pin,
+  NotebookPen,
+  LayoutGrid,
+  Columns2,
+  ChevronRight,
+} from "lucide-react";
+import { entities } from "@lifeos/core";
 import { tr } from "../i18n";
-import { Empty, EditButton, DeleteButton } from "../components";
+import { Empty } from "../components";
 import type { LifeStore } from "../store";
 import type { Edit } from "./types";
-import { Markdown } from "../markdown";
+import { NoteCard } from "./note-card";
 export function Ideas({
   store,
   edit,
@@ -16,7 +22,18 @@ export function Ideas({
   search: string;
 }) {
   const [archive, setArchive] = useState(false);
-  const notes = entities(store.records, "note")
+  const [category, setCategory] = useState("");
+  const [selected, setSelected] = useState<string | null>(null);
+  const [layout, setLayout] = useState<"desk" | "cards">(() => {
+    try {
+      return localStorage.getItem("lifeos-notes-layout") === "cards"
+        ? "cards"
+        : "desk";
+    } catch {
+      return "desk";
+    }
+  });
+  const matching = entities(store.records, "note")
     .filter(
       (n) =>
         n.data.archived === archive &&
@@ -29,262 +46,125 @@ export function Ideas({
         Number(b.data.pinned) - Number(a.data.pinned) ||
         b.updatedAt.localeCompare(a.updatedAt),
     );
+  const categories = [...new Set(matching.map((n) => n.data.category))].sort(
+    (a, b) => a.localeCompare(b, "tr"),
+  );
+  const notes = matching.filter(
+    (n) => !category || n.data.category === category,
+  );
+  const active = notes.find((n) => n.id === selected) ?? notes[0];
+  const changeLayout = (value: "desk" | "cards") => {
+    setLayout(value);
+    try {
+      localStorage.setItem("lifeos-notes-layout", value);
+    } catch {
+      /* Optional view preference. */
+    }
+  };
   return (
     <>
-      <div className="toolbar">
+      <div className="notes-studio-intro">
+        <span className="notes-studio-mark">
+          <NotebookPen size={28} />
+        </span>
+        <div>
+          <h2>{tr.notesDesk}</h2>
+          <p>{tr.notesDeskHint}</p>
+        </div>
+        <div className="view-switch" role="group" aria-label={tr.notesLayout}>
+          <button
+            aria-pressed={layout === "desk"}
+            onClick={() => changeLayout("desk")}
+          >
+            <Columns2 size={16} />
+            {tr.notesDeskView}
+          </button>
+          <button
+            aria-pressed={layout === "cards"}
+            onClick={() => changeLayout("cards")}
+          >
+            <LayoutGrid size={16} />
+            {tr.notesCardsView}
+          </button>
+        </div>
+      </div>
+      <div className="toolbar notes-filter-bar">
+        <div
+          className="category-filters"
+          role="group"
+          aria-label={tr.noteCategoryFilter}
+        >
+          <button
+            className={!category ? "selected" : ""}
+            aria-pressed={!category}
+            onClick={() => setCategory("")}
+          >
+            {tr.all} <small>{matching.length}</small>
+          </button>
+          {categories.map((value) => (
+            <button
+              key={value}
+              className={category === value ? "selected" : ""}
+              aria-pressed={category === value}
+              onClick={() => setCategory(value)}
+            >
+              {value}
+            </button>
+          ))}
+        </div>
         <button
           className={`button secondary ${archive ? "selected" : ""}`}
-          onClick={() => setArchive(!archive)}
+          aria-pressed={archive}
+          onClick={() => {
+            setArchive(!archive);
+            setCategory("");
+          }}
         >
           {tr.archived}
         </button>
-        <span className="muted">
-          {notes.length} {tr.ideas.toLocaleLowerCase("tr")}
-        </span>
       </div>
-      <div className="notes-grid">
-        {notes.map((n) => (
-          <NoteCard key={n.id} note={n} store={store} edit={edit} />
-        ))}
-        {!notes.length && <Empty action={() => edit("note")} />}
-      </div>
+      {layout === "desk" && active ? (
+        <div className="notes-workbench">
+          <nav className="notes-index" aria-label={tr.noteSelection}>
+            {notes.map((n) => (
+              <button
+                key={n.id}
+                className={`note-index-item ${active.id === n.id ? "active" : ""}`}
+                aria-current={active.id === n.id ? "true" : undefined}
+                onClick={() => setSelected(n.id)}
+              >
+                <span className="note-index-meta">
+                  {n.data.category}
+                  {n.data.pinned && <Pin size={12} />}
+                </span>
+                <strong>{n.data.title}</strong>
+                <span className="note-index-excerpt">
+                  {n.data.body.replace(/[#*`>]/g, "").slice(0, 110) ||
+                    tr.noteEmptyBody}
+                </span>
+                <small>
+                  {new Date(n.updatedAt).toLocaleDateString("tr-TR", {
+                    day: "numeric",
+                    month: "short",
+                    timeZone: store.settings.timezone,
+                  })}
+                  <ChevronRight size={14} />
+                </small>
+              </button>
+            ))}
+          </nav>
+          <div className="note-editor-surface">
+            <NoteCard key={active.id} note={active} store={store} edit={edit} />
+          </div>
+        </div>
+      ) : (
+        <div className="notes-grid">
+          {notes.map((n) => (
+            <NoteCard key={n.id} note={n} store={store} edit={edit} />
+          ))}
+          {!notes.length && <Empty action={() => edit("note")} />}
+        </div>
+      )}
     </>
-  );
-}
-function NoteCard({
-  note,
-  store,
-  edit,
-}: {
-  note: TypedEntity<"note">;
-  store: LifeStore;
-  edit: Edit;
-}) {
-  const draftKey = `lifeos-note-draft:${note.id}`;
-  const [preview, setPreview] = useState(false);
-  const readDraft = () => {
-    try {
-      const value = JSON.parse(sessionStorage.getItem(draftKey) ?? "null") as {
-        body?: unknown;
-        savedBody?: unknown;
-        version?: unknown;
-      } | null;
-      return value &&
-        typeof value.body === "string" &&
-        value.body.length <= 20000 &&
-        typeof value.savedBody === "string" &&
-        typeof value.version === "number"
-        ? (value as { body: string; savedBody: string; version: number })
-        : null;
-    } catch {
-      return null;
-    }
-  };
-  const [initialDraft] = useState(readDraft);
-  const [body, setBody] = useState(initialDraft?.body ?? note.data.body),
-    [savedBody, setSavedBody] = useState(
-      initialDraft?.savedBody ?? note.data.body,
-    ),
-    [version, setVersion] = useState(initialDraft?.version ?? note.version),
-    [conflicted, setConflicted] = useState(false);
-  const pending = useRef<Promise<boolean> | null>(null),
-    timer = useRef<ReturnType<typeof setTimeout> | null>(null),
-    flushRef = useRef<() => Promise<boolean>>(async () => true);
-  useEffect(() => {
-    if (note.version === version) return;
-    if (body === savedBody || note.data.body === body) {
-      setBody(note.data.body);
-      setSavedBody(note.data.body);
-      setVersion(note.version);
-    } else if (note.data.body === savedBody) {
-      setVersion(note.version);
-    } else {
-      setConflicted(true);
-    }
-  }, [note.version, note.data.body]);
-  const flush = (): Promise<boolean> => {
-    if (timer.current) clearTimeout(timer.current);
-    if (pending.current) return pending.current;
-    if (conflicted) return Promise.resolve(false);
-    if (body === savedBody) return Promise.resolve(true);
-    const action = store
-      .service()
-      .save("note", { ...note.data, body }, note.id, version)
-      .then(async (record) => {
-        setVersion(record.version);
-        setSavedBody(body);
-        const newer = readDraft();
-        if (newer?.body === body) sessionStorage.removeItem(draftKey);
-        else if (newer)
-          sessionStorage.setItem(
-            draftKey,
-            JSON.stringify({
-              ...newer,
-              version: record.version,
-              savedBody: body,
-            }),
-          );
-        await store.refresh();
-        return true;
-      })
-      .catch((error) => {
-        store.setError(String(error));
-        setConflicted(true);
-        return false;
-      })
-      .finally(() => {
-        pending.current = null;
-      });
-    pending.current = action;
-    return action;
-  };
-  flushRef.current = flush;
-  useEffect(() => {
-    if (body === savedBody || conflicted) return;
-    timer.current = setTimeout(() => void flushRef.current(), 800);
-    return () => {
-      if (timer.current) clearTimeout(timer.current);
-    };
-  }, [body, savedBody, version, conflicted]);
-  useEffect(
-    () => () => {
-      void flushRef.current();
-    },
-    [],
-  );
-  const changeBody = (value: string) => {
-    setBody(value);
-    try {
-      sessionStorage.setItem(
-        draftKey,
-        JSON.stringify({ body: value, savedBody, version }),
-      );
-    } catch {
-      store.setError(tr.draftStorageError);
-    }
-  };
-  const mutate = async (patch: Record<string, unknown>) => {
-    if (!(await flush())) return;
-    const latest = entities(await store.service().list(), "note").find(
-      (r) => r.id === note.id,
-    );
-    if (latest)
-      await store.save(
-        "note",
-        { ...latest.data, ...patch },
-        note.id,
-        latest.version,
-      );
-  };
-  const editLatest = async () => {
-    if (!(await flush())) return;
-    const latest = entities(await store.service().list(), "note").find(
-      (r) => r.id === note.id,
-    );
-    if (latest) edit("note", latest);
-  };
-  const saveCopy = async () => {
-    const record = await store.save("note", {
-      ...note.data,
-      title: note.data.title.slice(0, 225) + " (" + tr.draft + ")",
-      body,
-      pinned: true,
-    });
-    if (record) {
-      sessionStorage.removeItem(draftKey);
-      setBody(note.data.body);
-      setSavedBody(note.data.body);
-      setVersion(note.version);
-      setConflicted(false);
-    }
-  };
-  // Preserve the click target while blur-triggered autosave changes the layout.
-  return (
-    <article
-      className="panel note-card"
-      onMouseDown={(event) => {
-        if (event.target instanceof Element && event.target.closest("button"))
-          event.preventDefault();
-      }}
-    >
-      <div className="section-heading">
-        <span className="badge">{note.data.category}</span>
-        <div className="row-actions">
-          <button
-            className={`icon-button ${note.data.pinned ? "orange-text" : ""}`}
-            aria-label={tr.pin}
-            onClick={() => void mutate({ pinned: !note.data.pinned })}
-          >
-            <Pin size={15} />
-          </button>
-          <EditButton onClick={() => void editLatest()} />
-          <DeleteButton record={note} store={store} />
-        </div>
-      </div>
-      <h3>{note.data.title}</h3>
-      <button
-        className="text-button"
-        aria-pressed={preview}
-        onClick={() => setPreview(!preview)}
-      >
-        {preview ? tr.write : tr.preview}
-      </button>
-      {preview ? (
-        <Markdown body={body} />
-      ) : (
-        <textarea
-          aria-label={tr.body}
-          value={body}
-          onChange={(e) => changeBody(e.target.value)}
-          onBlur={() => void flush()}
-          rows={5}
-        />
-      )}
-      {conflicted ? (
-        <div className="error-message" role="alert">
-          {tr.noteConflict}
-          <button className="text-button" onClick={() => void saveCopy()}>
-            {tr.saveDraftCopy}
-          </button>
-        </div>
-      ) : (
-        body !== savedBody && <small className="muted">{tr.unsavedDraft}</small>
-      )}
-      <div className="note-tags">
-        {note.data.tags.map((tag) => (
-          <span key={tag}>#{tag}</span>
-        ))}
-      </div>
-      <div className="note-actions">
-        <button
-          className="text-button"
-          onClick={() =>
-            edit("task", undefined, {
-              title: note.data.title,
-              description: body,
-            })
-          }
-        >
-          {tr.convertTask}
-        </button>
-        <button
-          className="text-button"
-          onClick={() =>
-            edit("project", undefined, {
-              title: note.data.title,
-              description: body,
-            })
-          }
-        >
-          {tr.convertProject}
-        </button>
-        <button
-          className="text-button"
-          onClick={() => void mutate({ archived: !note.data.archived })}
-        >
-          {note.data.archived ? tr.restore : tr.archive}
-        </button>
-      </div>
-    </article>
   );
 }

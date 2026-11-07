@@ -20,3 +20,11 @@ Gezinme | Arama                           Tema / Hızlı ekle
 Sohbetler gezinmede doğrudan görünür. Kaynak sekmeleri, arama, kırkar kayıt yükleme ve Codex devam komutunu kopyalama vardır. Başlıklar tam saklanır; uzun başlıklar ekranda sınırlanır. Tam mesajlar kaynak uygulamadadır. Otomatik geçmiş eşitlemesi veya çalışan Codex masaüstü deep-link iddiası yoktur.
 
 Klavye odağı korunur, dar ekranda bölümler tek sütuna iner. Kısa pencerelerde gezinme kaydırılabilir; Ayarlar pencere dışında kalmaz. Ekran görüntülerindeki örnek kayıtlar sentetik test verisidir; kişisel sohbetler Git'e eklenmez.
+
+## Interaction and note workspace revision — 7 November
+
+The owner found the prior change too theme-oriented. This pass changes information layout: notes have a selectable index and a full editor, category filters and a persisted cards/desk choice; dashboard agenda switches between timed events and every task assigned to today. The existing autosave, conflict protection and real records remain authoritative. No sample content is inserted into a user profile.
+
+Motion is tied to actions: a 170ms modal open, press feedback and short selection/hover transitions. There is no perpetual background loop, motion framework or remote font. Reduced-motion preference disables these effects. Color, layout and accessible labels stay in the existing palette/central Turkish copy. The note editor was extracted into a small separate module; desktop queue and cloud/native schemas were unchanged.
+
+Presentation uses a separate repository-owned synthetic fixture, readable 1360px screenshots and clickable full-size images. The former personal calendar image is replaced by a synthetic 2030 calendar. Screenshots are not evidence of native notification behavior.
