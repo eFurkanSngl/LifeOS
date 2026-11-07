@@ -106,3 +106,13 @@ Three independent QA reminders exercised the native queue (timestamps UTC):
 A later clean close/update/relaunch retained exactly one event for each reminder; no duplicate appeared. These are accepted OS submission checks, not a fresh visible-banner or audible-delivery confirmation. The owner previously confirmed Settings banner and sound. Quiet-hours and close-to-tray settings were restored to their original values; Windows startup and DND were not changed. Single-instance launch returned the hidden app. No crash, sleep, toast-action or credential-rotation pass is inferred.
 
 The complete populated export contained 1,501 records. An isolated SQLite restore preserved every payload and tombstone; reimport skipped all 1,501, a newer note edit survived, and reopening the isolated database preserved it. The live database was not restored or cleared. Native cloud session restoration and an empty non-settings outbox were observed after update. Private chat titles, backups and database files remain ignored.
+
+## Interactive notes package — 7 November 2026
+
+Runtime `e45e978` passed both jobs in https://github.com/eFurkanSngl/LifeOS/actions/runs/42381403378: 71 unit tests, 22 browser flows, native check, six Rust tests and NSIS packaging. Installer SHA256 `D703334DC19370EEBF53A8867C7134B634B538037FC7D402CDFF2300AE6EE8CF`; installer exit 0; installed executable 9,637,376 bytes, 17:29:12 Europe/Istanbul.
+
+A private backup preceded normal app close and update. A read-only before/after comparison matched all 1,501 record payloads, kinds and tombstones exactly: 19 tasks, 18 reminders, two notes, one settings record, 181 Codex references and 1,280 shortcuts. No sample fixture was imported into the live profile. Personal records were not edited during UI verification.
+
+The installed app opened normally. Computer Use observed the new agenda switches, then opened Fikirler & notlar, observed the selectable note index and real note body, switched to cards and observed both existing notes, returned to the desk and collapsed the right panel. The app remains open in the note desk. Native screenshots were not published; the README uses a separate synthetic fixture. The first snapshot of an occluded/minimized window was unsuitable; activation and a fresh snapshot recovered the correct LifeOS surface before input.
+
+This is an installed UI/preservation check. No new notification, cloud-schema, Spotify or microphone behavior was introduced or claimed. Existing lifecycle/cloud acceptance boundaries still apply. Image paste, voice recording and Spotify are documented proposals, not shipped controls. Browser tests additionally verify draft preservation while selecting notes, persisted view choice, both themes and reduced-motion response.

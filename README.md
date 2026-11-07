@@ -165,7 +165,7 @@ Spotify’ın resmî [oynatma API’si](https://developer.spotify.com/documentat
 
 Bu bir geliştirme sürümüdür. Son kapsamda **71 birim testi ve 22 tarayıcı akışı** vardır. Otomatik testler; not taslağı koruması, görünüm değişimi, temalar, PDF ilerlemesi, görevler, takvim, yedek, cloud şeması ve diğer kritik davranışları kapsar. Kaynak commit’in Windows kontrol/test/installer sonucunu [Actions](https://github.com/eFurkanSngl/LifeOS/actions/workflows/checks.yml) üzerinden ayrıca kontrol et.
 
-Önceki kurulu Windows sürümünde gerçek bulut giriş/aktarım, temiz yeniden açılışta oturum ve kayıt korunumu, dolu installer güncellemesi, ayrı SQLite profilinde 1.501 kayıtla yedek geri yükleme ve tekil native kuyruk gönderimleri doğrulandı. Kullanıcı Settings bildiriminde banner ve sesi doğruladı. Bu sonuçlar yeni UI’nın native kontrolünün yerine geçmez; sürüm ayrıntıları [native doğrulama](docs/NATIVE_VERIFICATION.md) dosyasında tutulur.
+`e45e978` Windows paketi [başarılı derlemeden](https://github.com/eFurkanSngl/LifeOS/actions/runs/42381403378) kuruldu. Yeni not çalışma masası ve kart görünümü gerçek Windows penceresinde kontrol edildi. Güncelleme öncesi/sonrası karşılaştırmada 1.501 kaydın içeriği ve silinme işaretleri aynı kaldı. Önceki sürümde gerçek bulut giriş/aktarım, oturum korunumu, ayrı SQLite profilinde dolu yedek geri yükleme ve tekil native kuyruk gönderimleri doğrulanmıştı; kullanıcı Settings bildiriminde banner ve sesi doğruladı. Bunlar her native senaryonun yeni sürümde tekrarlandığı anlamına gelmez. Ayrıntılar [native doğrulama](docs/NATIVE_VERIFICATION.md) dosyasında tutulur.
 
 Açık alanlar: uyku/uyanma ve ani çökme pencereleri, toast eylemlerinin tamamı, gerçek oturum yenileme/rotation, fiziksel ağ kesintisi/geri bağlantı ve iki istemci kabulü. Web yayını ertelendi. Tam transcript aktarımı, incremental/realtime sync ve normalize ilişkisel model tamamlanmış sayılmaz.
 
@@ -205,4 +205,4 @@ supabase              Sürümlü şema ve migration dosyaları
 
 [Kurulum](docs/SETUP.md) · [Canlı test](docs/LIVE_TEST.md) · [Native](docs/NATIVE_VERIFICATION.md) · [Bulut](docs/CLOUD_VERIFICATION.md) · [Mimari](docs/ARCHITECTURE.md) · [Tasarım](docs/DESIGN.md) · [Kalanlar](docs/ROADMAP.md)
 
-Depo özeldir; herkese açık lisans veya ticari dağıtım izni verilmiş değildir. Bir arkadaşın kodu görmek için depo erişimine, uygulamayı denemek için uygun kurulum paketine ihtiyaç duyar.
+Depo özel kalır. Bir arkadaşın kodu görmek için depo erişimine, uygulamayı denemek için uygun kurulum paketine ihtiyaç duyar.

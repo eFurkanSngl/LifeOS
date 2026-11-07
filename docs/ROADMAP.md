@@ -18,3 +18,9 @@ Performance remains measurable improvement work. The original 60–120 MB aspira
 Separate future work: full chat transcript import, automatic incremental history ingestion, incremental/realtime cloud sync, normalized relational storage and partial graph recovery. Register the already-applied initial migration in Supabase CLI history before future db push. Password recovery/email changes require SMTP. None is silently marked complete.
 
 No SaaS, paid AI, hidden collection or external messaging automation is planned. Windows startup preference remains the owner's choice.
+
+## Interactive workspace and presentation update
+
+Runtime `e45e978` is installed after successful frontend and Windows jobs (71 unit tests / 22 browser flows / six Rust tests). Native note desk/cards and new agenda controls were observed; all 1,501 payloads/tombstones survived installer update unchanged. README was rewritten for new users with six example-data views and detailed setup/usage/limitations. No personal native screenshots were published; the old calendar image was replaced with a synthetic one.
+
+Spotify local controls, image attachments and user-started voice notes are separate proposals in INTEGRATIONS_NEXT.md. None is presented as implemented. Existing Windows lifecycle and cloud acceptance limits remain open.

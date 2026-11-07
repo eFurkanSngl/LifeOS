@@ -54,3 +54,11 @@ Yalnızca geçmeyen adımı, beklenen/gerçek davranışı ve gizli bilgi içerm
 - [x] Installer güncellemesi ders, PDF, sohbet kayıtlarını ve bulut oturumunu korudu; kullanıcı kayıtlarının eşitleme kuyruğu boş.
 
 Bu üç uyarının sonucu Windows'a gönderimdir; yeni banner/ses onayı yerine geçmez. Yukarıdaki birleşik maddelerde henüz gözlenmeyen adımlar açık kalır. Uyku/uyanma, çökme, toast düğmeleri, oturum süresi dolması ve fiziksel ağ kesintisi testleri ayrıca yapılabilir; bunlar yapılmış gibi raporlanmadı.
+
+## Yeni not çalışma alanı — 7 Kasım
+
+- [x] `e45e978` kuruldu; önce/sonra 1.501 kayıt içeriği ve tombstone birebir korundu.
+- [x] Gerçek Windows penceresinde Çalışma masası ve Kartlar arasında geçiş, iki mevcut notun görüntülenmesi ve sağ paneli daraltma gözlendi. Gerçek notların metni değiştirilmedi.
+- [x] Tarayıcı testinde notlar arasında geçişte yerel taslak, görünüm tercihinin yeniden yüklenmesi ve azaltılmış hareket tercihi geçti.
+
+Spotify, görsel ekleri ve ses kaydı bu pakette yoktur; sonraki aşama planı INTEGRATIONS_NEXT.md dosyasındadır.
