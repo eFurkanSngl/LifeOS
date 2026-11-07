@@ -31,6 +31,7 @@ export function useLife(cloudUrl?: string, cloudKey?: string) {
     syncLock = useRef(false),
     retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null),
     retryAttempt = useRef(0);
+  const lastSyncError = useRef("");
   const service = () => {
     if (!serviceRef.current)
       serviceRef.current = new LifeService(createRepository());
@@ -174,8 +175,11 @@ export function useLife(cloudUrl?: string, cloudKey?: string) {
       retryAttempt.current = 0;
       if (retryTimer.current) clearTimeout(retryTimer.current);
       await refresh();
+      setError((current) => (current === lastSyncError.current ? "" : current));
+      lastSyncError.current = "";
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      lastSyncError.current = e instanceof Error ? e.message : String(e);
+      setError(lastSyncError.current);
       if (retryTimer.current) clearTimeout(retryTimer.current);
       retryTimer.current = setTimeout(
         () => void sync(),
