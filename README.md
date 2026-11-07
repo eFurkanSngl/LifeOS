@@ -13,7 +13,7 @@ LifeOS; kişisel kullanım için geliştirilen, verilerini önce cihazında sakl
 ## Windows kurulumu
 
 1. Depoya erişimin varsa [GitHub Actions](https://github.com/eFurkanSngl/LifeOS/actions/workflows/checks.yml) sayfasındaki **başarılı** bir çalışmayı aç.
-2. **Artifacts → lifeos-windows-unsigned** paketini indir ve ZIP dosyasını aç. Artifact indirmek GitHub oturumu ve özel depoya erişim gerektirebilir.
+2. **Artifacts → lifeos-windows-unsigned** paketini indir ve ZIP dosyasını aç. Artifact indirmek GitHub oturumu gerektirebilir.
 3. `LifeOS_0.1.0_x64-setup.exe` dosyasını çalıştır. Bu geliştirme paketi henüz kod imzalı değildir.
 4. LifeOS’u aç. İlk açılışta boş çalışma alanı görmen normaldir; örnek görsellerdeki kayıtlar uygulamaya otomatik eklenmez.
 5. **Ayarlar → Bildirim testi gönder** ile kendi bilgisayarındaki teslimi dene.
@@ -205,4 +205,4 @@ supabase              Sürümlü şema ve migration dosyaları
 
 [Kurulum](docs/SETUP.md) · [Canlı test](docs/LIVE_TEST.md) · [Native](docs/NATIVE_VERIFICATION.md) · [Bulut](docs/CLOUD_VERIFICATION.md) · [Mimari](docs/ARCHITECTURE.md) · [Tasarım](docs/DESIGN.md) · [Kalanlar](docs/ROADMAP.md)
 
-Depo özel kalır. Bir arkadaşın kodu görmek için depo erişimine, uygulamayı denemek için uygun kurulum paketine ihtiyaç duyar.
+Depo herkese açık olarak görüntülenebilir. Uygulamayı denemek için Windows kurulum paketini kullanabilirsin. Kişisel veriler ve yerel ayarlar bu depoya dahil değildir.
