@@ -95,6 +95,45 @@ afterEach(async () => {
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
+it("pulls a large remote collection without rereading the full local database per row", async () => {
+  await db.query(
+    "select public.lifeos_push(gen_random_uuid(),'note',jsonb_build_object('title','Remote '||n),false,0) from generate_series(1,100) n",
+  );
+  const reads = vi.spyOn(service.repo, "list");
+  expect((await adapter.sync(service.repo)).conflicts).toHaveLength(0);
+  expect(await service.list()).toHaveLength(100);
+  expect(reads.mock.calls.length).toBeLessThanOrEqual(3);
+});
+it("preserves a local edit made during a paginated pull", async () => {
+  const task = await service.save("task", { title: "Initial" });
+  await adapter.sync(service.repo);
+  const local = (await service.list()).find((r) => r.id === task.id)!;
+  await db.query("select public.lifeos_push($1,'task',$2::jsonb,false,1)", [
+    task.id,
+    JSON.stringify({ ...task.data, title: "Remote update" }),
+  ]);
+  const put = service.repo.put.bind(service.repo);
+  vi.spyOn(service.repo, "put").mockImplementationOnce(
+    async (remote, expected) => {
+      await put(
+        {
+          ...local,
+          data: { ...local.data, title: "Local during pull" },
+          version: local.version + 1,
+          dirty: true,
+        },
+        local.version,
+      );
+      await put(remote, expected);
+    },
+  );
+  await expect(adapter.sync(service.repo)).rejects.toThrow();
+  expect((await service.list()).find((r) => r.id === task.id)).toMatchObject({
+    data: { title: "Local during pull" },
+    dirty: true,
+  });
+  expect((await adapter.sync(service.repo)).conflicts).toHaveLength(1);
+});
 it("synchronizes durable offline mutations through the real Supabase JS request path", async () => {
   const task = await service.save("task", { title: "Offline" });
   expect((await adapter.sync(service.repo)).conflicts).toHaveLength(0);

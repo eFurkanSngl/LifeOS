@@ -66,16 +66,20 @@ export function useLife(cloudUrl?: string, cloudKey?: string) {
   useEffect(() => {
     let mounted = true;
     let unlisten: (() => void) | undefined;
+    let refreshTimer: ReturnType<typeof setTimeout> | undefined;
     const boot = async () => {
       try {
         await refresh();
         if (!mounted) return;
         setReady(true);
         if (isTauri()) {
-          const dispose = await listen(
-            "records-changed",
-            () => void refresh().catch((e) => setError(String(e))),
-          );
+          const dispose = await listen("records-changed", () => {
+            if (refreshTimer) return;
+            refreshTimer = setTimeout(() => {
+              refreshTimer = undefined;
+              if (mounted) void refresh().catch((e) => setError(String(e)));
+            }, 200);
+          });
           if (mounted) unlisten = dispose;
           else dispose();
         } else {
@@ -101,6 +105,7 @@ export function useLife(cloudUrl?: string, cloudKey?: string) {
     return () => {
       mounted = false;
       unlisten?.();
+      if (refreshTimer) clearTimeout(refreshTimer);
       channel.current?.close();
       window.removeEventListener("focus", focus);
     };

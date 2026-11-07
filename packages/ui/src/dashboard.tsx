@@ -9,6 +9,8 @@ import {
   BookOpen,
   Flame,
   CheckCheck,
+  MessageSquare,
+  StickyNote,
 } from "lucide-react";
 import { entities, today, formatTime, type TypedEntity } from "@lifeos/core";
 import { tr } from "./i18n";
@@ -23,6 +25,7 @@ import { FocusPanel } from "./features/focus";
 import { ProjectCard } from "./features/projects";
 import type { Edit } from "./features/types";
 import type { LifeStore } from "./store";
+import { LearningOverview } from "./features/learning-overview";
 export function Reminders({
   store,
   edit,
@@ -211,12 +214,10 @@ export function Dashboard({
               timeZone: zone,
             })}
           </div>
-          <h1>
-            {greeting}
-            <br />
-            <span>{tr.greeting}</span>
-          </h1>
-          <p>{tr.tagline}</p>
+          <h1>{tr.todayWorkspace}</h1>
+          <p>
+            {greeting} {tr.todayWorkspaceHint}
+          </p>
         </div>
         <div className="day-orbit" aria-hidden="true">
           <div />
@@ -229,6 +230,24 @@ export function Dashboard({
             )}
           </span>
         </div>
+      </div>
+      <div className="quick-actions" role="group" aria-label={tr.quickActions}>
+        <button onClick={() => edit("task")}>
+          <Plus size={17} />
+          {tr.quickAdd}
+        </button>
+        <button onClick={() => edit("note")}>
+          <StickyNote size={17} />
+          {tr.captureNote}
+        </button>
+        <button onClick={() => navigate("planner")}>
+          <CalendarDays size={17} />
+          {tr.planner}
+        </button>
+        <button onClick={() => navigate("chats")}>
+          <MessageSquare size={17} />
+          {tr.openChats}
+        </button>
       </div>
       <div className="daily-progress">
         <div className="progress-intro">
@@ -277,6 +296,7 @@ export function Dashboard({
           <span>{tr.habitProgress}</span>
         </div>
       </div>
+      <LearningOverview store={store} edit={edit} navigate={navigate} />
       {!tasks.length && !projects.length && (
         <div className="welcome-strip">
           <div>
@@ -335,30 +355,32 @@ export function Dashboard({
               />
             )}
           </Section>
-          <Section
-            title={tr.activeProjects}
-            action={
-              <button
-                className="text-button"
-                onClick={() => navigate("projects")}
-              >
-                {tr.viewAll}
-                <ArrowUpRight size={15} />
-              </button>
-            }
-          >
-            <div className="project-grid">
-              {projects.slice(0, 4).map((p) => (
-                <ProjectCard
-                  project={p}
-                  records={store.records}
-                  key={p.id}
+          {projects.length > 0 && (
+            <Section
+              title={tr.activeProjects}
+              action={
+                <button
+                  className="text-button"
                   onClick={() => navigate("projects")}
-                />
-              ))}
-              {!projects.length && <Empty action={() => edit("project")} />}
-            </div>
-          </Section>
+                >
+                  {tr.viewAll}
+                  <ArrowUpRight size={15} />
+                </button>
+              }
+            >
+              <div className="project-grid">
+                {projects.slice(0, 4).map((p) => (
+                  <ProjectCard
+                    project={p}
+                    records={store.records}
+                    key={p.id}
+                    onClick={() => navigate("projects")}
+                  />
+                ))}
+                {!projects.length && <Empty action={() => edit("project")} />}
+              </div>
+            </Section>
+          )}
           <Section title={tr.dailyReview} sub={tr.reviewHint}>
             <textarea
               className="review-input"

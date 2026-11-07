@@ -1,4 +1,91 @@
 import { test, expect } from "@playwright/test";
+test("persists both themes and exposes learning and conversations in the workspace", async ({
+  page,
+}) => {
+  await page.emulateMedia({ colorScheme: "dark" });
+  await page.goto("/");
+  await expect(
+    page.getByRole("button", { name: "İlk görevini ekle" }),
+  ).toBeVisible();
+  await page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const r = indexedDB.open("lifeos-v1", 1);
+      r.onsuccess = () => resolve(r.result);
+      r.onerror = () => reject(r.error);
+    });
+    const tx = db.transaction("records", "readwrite");
+    for (const data of [
+      {
+        title: "ALGORİTMALAR · PDF",
+        taskKind: "pdf",
+        courseCode: "BIL113U",
+        totalUnits: 8,
+        completedUnits: 2,
+      },
+      {
+        title: "Algoritmalar canlı ders",
+        taskKind: "lesson",
+        scheduledAt: "2030-01-11T17:00:00.000Z",
+        duration: 60,
+        status: "planned",
+      },
+      {
+        title: "Güz ara sınavı",
+        taskKind: "exam",
+        allDay: true,
+        dueDate: "2030-01-12",
+        endDate: "2030-01-13",
+        status: "planned",
+      },
+    ])
+      tx.objectStore("records").put({
+        id: crypto.randomUUID(),
+        kind: "task",
+        data,
+        version: 1,
+        cloudVersion: 0,
+        dirty: true,
+        deleted: false,
+        updatedAt: new Date().toISOString(),
+      });
+    await new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+  });
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "Öğrenme alanın" }),
+  ).toBeVisible();
+  await expect(
+    page.locator(".course-progress-detail progress"),
+  ).toHaveAttribute("value", "2");
+  await page.getByLabel("Tema seçimi").selectOption("light");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await page.reload();
+  await expect(page.getByLabel("Tema seçimi")).toHaveValue("light");
+  await page.setViewportSize({ width: 1440, height: 1100 });
+  await page.screenshot({
+    path: "docs/screenshots/workspace-light-demo.png",
+    fullPage: true,
+    animations: "disabled",
+  });
+  await page.getByLabel("Tema seçimi").selectOption("dark");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await page.screenshot({
+    path: "docs/screenshots/workspace-dark-demo.png",
+    fullPage: true,
+    animations: "disabled",
+  });
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: "Sohbetler", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Sohbetler", exact: true }),
+  ).toBeVisible();
+});
 test("bounds large chat histories and searches both providers", async ({
   page,
 }) => {
@@ -80,6 +167,26 @@ test("bounds large chat histories and searches both providers", async ({
       .locator(".simple-row")
       .filter({ hasText: "Codex Thread 89" }),
   ).toBeVisible();
+  await page.evaluate(() =>
+    Object.defineProperty(navigator, "clipboard", {
+      value: {
+        writeText: async (value: string) =>
+          localStorage.setItem("test-clipboard", value),
+      },
+    }),
+  );
+  await page
+    .getByRole("button", {
+      name: "Devam komutunu kopyala: Codex Thread 89",
+      exact: true,
+    })
+    .click();
+  await expect(
+    page.getByText("Oturum komutu kopyalandı.", { exact: true }),
+  ).toBeVisible();
+  expect(
+    await page.evaluate(() => localStorage.getItem("test-clipboard")),
+  ).toBe("codex resume test-89");
   await page.setViewportSize({ width: 1440, height: 1100 });
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: "docs/screenshots/chat-history-demo.png" });

@@ -159,6 +159,11 @@ export class CloudAdapter {
       }
     }
     const pending = new Set(conflicts.map((c) => c.local.id));
+    // Snapshot once for the paginated pull. CAS still rejects a local edit made
+    // after this snapshot, so retry preserves it without N full database reads.
+    const localById = new Map(
+      (await repo.list()).map((record) => [record.id, record]),
+    );
     for (let offset = 0; ; offset += 500) {
       const { data, error } = await this.client
         .from("lifeos_records")
@@ -169,7 +174,7 @@ export class CloudAdapter {
       if (error) throw new Error(error.message);
       for (const row of data ?? []) {
         const remote = fromCloud(row),
-          current = (await repo.list()).find((r) => r.id === remote.id);
+          current = localById.get(remote.id);
         if (pending.has(remote.id)) continue;
         if (current?.dirty) {
           if (current.cloudVersion !== remote.cloudVersion)
@@ -181,6 +186,10 @@ export class CloudAdapter {
           { ...remote, version: (current?.version ?? 0) + 1 },
           current?.version ?? 0,
         );
+        localById.set(remote.id, {
+          ...remote,
+          version: (current?.version ?? 0) + 1,
+        });
       }
       if (!data || data.length < 500) break;
     }

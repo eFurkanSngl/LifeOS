@@ -1,25 +1,10 @@
 import { useEffect, useState } from "react";
-import {
-  Check,
-  RefreshCw,
-  Mail,
-  ShieldCheck,
-  Terminal,
-  Link2,
-} from "lucide-react";
+import { Check, RefreshCw, Mail, ShieldCheck, Terminal } from "lucide-react";
 import { invoke, isTauri } from "@tauri-apps/api/core";
 import { enable, disable, isEnabled } from "@tauri-apps/plugin-autostart";
-import { entities } from "@lifeos/core";
-import { providers } from "@lifeos/integrations";
 import type { LifeStore } from "./store";
 import { tr } from "./i18n";
-import {
-  Section,
-  EditButton,
-  DeleteButton,
-  Empty,
-  ExternalLink,
-} from "./components";
+import { Section } from "./components";
 import { Backup, download } from "./features/backup";
 import type { Edit } from "./features/types";
 import { NotificationLog } from "./notification-log";
@@ -309,127 +294,4 @@ export function Settings({ store, edit }: { store: LifeStore; edit: Edit }) {
     </div>
   );
 }
-export function Integrations({
-  store,
-  edit,
-  search,
-}: {
-  store: LifeStore;
-  edit: Edit;
-  search: string;
-}) {
-  const [chatLimit, setChatLimit] = useState(40);
-  const [sessionLimit, setSessionLimit] = useState(40);
-  const shortcuts = entities(store.records, "shortcut")
-      .filter((s) =>
-        s.data.title
-          .toLocaleLowerCase("tr")
-          .includes(search.toLocaleLowerCase("tr")),
-      )
-      .sort(
-        (a, b) =>
-          Number(b.data.pinned) - Number(a.data.pinned) ||
-          a.data.order - b.data.order,
-      ),
-    sessions = entities(store.records, "codex").filter((s) =>
-      `${s.data.title} ${s.data.reference}`
-        .toLocaleLowerCase("tr")
-        .includes(search.toLocaleLowerCase("tr")),
-    );
-  return (
-    <>
-      <div className="provider-grid">
-        {providers.map((p) => (
-          <div className="panel provider" key={p.id}>
-            <Link2 size={20} />
-            <h3>{p.name}</h3>
-            <p>{p.capabilities.join(", ")}</p>
-            <span className="badge">
-              {p.id === "supabase"
-                ? store.cloud
-                  ? tr.account
-                  : tr.cloudMissing
-                : tr.local}
-            </span>
-          </div>
-        ))}
-      </div>
-      <Section
-        title={tr.chatgpt}
-        sub={tr.importedChatHint}
-        action={
-          <button className="button secondary" onClick={() => edit("shortcut")}>
-            {tr.new}
-          </button>
-        }
-      >
-        {shortcuts.length ? (
-          shortcuts.slice(0, chatLimit).map((s) => (
-            <div className="simple-row" key={s.id}>
-              <span className={`shortcut-dot ${s.data.color}`} />
-              <ExternalLink url={s.data.url}>{s.data.title}</ExternalLink>
-              <span className="spacer" />
-              <EditButton onClick={() => edit("shortcut", s)} />
-              <DeleteButton record={s} store={store} />
-            </div>
-          ))
-        ) : (
-          <Empty action={() => edit("shortcut")} />
-        )}
-      </Section>
-      <div className="toolbar">
-        <span>
-          {Math.min(chatLimit, shortcuts.length)} / {shortcuts.length}{" "}
-          {tr.chatCount}
-        </span>
-        {shortcuts.length > chatLimit && (
-          <button
-            className="button secondary"
-            onClick={() => setChatLimit((n) => n + 40)}
-          >
-            {tr.moreChats}
-          </button>
-        )}
-      </div>
-      <Section
-        title={tr.codex}
-        sub={tr.codexHistoryHint}
-        action={
-          <button className="button secondary" onClick={() => edit("codex")}>
-            {tr.new}
-          </button>
-        }
-      >
-        {sessions.slice(0, sessionLimit).map((s) => (
-          <div className="simple-row" key={s.id}>
-            <Terminal size={17} />
-            <span className="chat-session-title" title={s.data.title}>
-              <span>{s.data.title}</span>
-              <small>{s.data.reference}</small>
-            </span>
-            {s.data.url && (
-              <ExternalLink url={s.data.url}>{tr.open}</ExternalLink>
-            )}
-            <EditButton onClick={() => edit("codex", s)} />
-            <DeleteButton record={s} store={store} />
-          </div>
-        ))}
-        {!sessions.length && <Empty action={() => edit("codex")} />}
-      </Section>
-      <div className="toolbar">
-        <span>
-          {Math.min(sessionLimit, sessions.length)} / {sessions.length}{" "}
-          {tr.chatCount}
-        </span>
-        {sessions.length > sessionLimit && (
-          <button
-            className="button secondary"
-            onClick={() => setSessionLimit((n) => n + 40)}
-          >
-            {tr.moreChats}
-          </button>
-        )}
-      </div>
-    </>
-  );
-}
+export { Integrations } from "./features/conversations";

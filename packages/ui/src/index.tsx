@@ -25,6 +25,7 @@ import {
   ChevronRight,
   BookOpen,
   Code2,
+  MessagesSquare,
 } from "lucide-react";
 import { type Entity, type Kind, entities, SETTINGS_ID } from "@lifeos/core";
 import { isTauri } from "@tauri-apps/api/core";
@@ -35,6 +36,7 @@ import { RecordForm, Modal } from "./components";
 import { Dashboard, Reminders } from "./dashboard";
 import type { Edit } from "./features/types";
 import { WorkspaceResize } from "./workspace-resize";
+import { useTheme, ThemePicker } from "./theme";
 const TaskList = lazy(() =>
   import("./features/tasks").then((m) => ({ default: m.TaskList })),
 );
@@ -69,6 +71,7 @@ const nav = [
   ["habits", Repeat2],
   ["focus", Flame],
   ["ideas", Lightbulb],
+  ["chats", MessagesSquare],
   ["integrations", Plug],
 ] as const;
 export function LifeOS({
@@ -93,6 +96,7 @@ export function LifeOS({
     [capture, setCapture] = useState(""),
     [now, setNow] = useState(new Date()),
     [online, setOnline] = useState(true);
+  const theme = useTheme();
   const edit: Edit = (kind, record, initial) =>
     setEditing({ kind, record, initial });
   useEffect(() => {
@@ -205,7 +209,7 @@ export function LifeOS({
             ? "habit"
             : page === "ideas"
               ? "note"
-              : page === "integrations"
+              : page === "integrations" || page === "chats"
                 ? "shortcut"
                 : "task";
   if (!store.ready)
@@ -330,6 +334,7 @@ export function LifeOS({
               <kbd>Ctrl K</kbd>
             </div>
             <div className="topbar-actions">
+              <ThemePicker {...theme} />
               <span className="top-date">
                 {now.toLocaleDateString("tr-TR", {
                   day: "numeric",
@@ -401,7 +406,9 @@ export function LifeOS({
                         ? tr.settingsHint
                         : page === "focus"
                           ? tr.focusHint
-                          : tr.tagline}
+                          : page === "chats"
+                            ? tr.chatWorkspaceHint
+                            : tr.tagline}
                     </p>
                   </div>
                   {!["settings", "focus", "career"].includes(page) && (
@@ -496,7 +503,12 @@ export function LifeOS({
                     }
                   />
                 ) : (
-                  <Integrations store={store} edit={edit} search={search} />
+                  <Integrations
+                    store={store}
+                    edit={edit}
+                    search={search}
+                    conversationsOnly={page === "chats"}
+                  />
                 )}
               </Suspense>
               <footer className="main-footer">
@@ -567,7 +579,7 @@ export function LifeOS({
                     {shortcuts.length > 8 && (
                       <button
                         className="text-button"
-                        onClick={() => navigate("integrations")}
+                        onClick={() => navigate("chats")}
                       >
                         {tr.allChats} ({shortcuts.length})
                       </button>
@@ -621,7 +633,7 @@ export function LifeOS({
                   {sessions.length > 8 && (
                     <button
                       className="text-button"
-                      onClick={() => navigate("integrations")}
+                      onClick={() => navigate("chats")}
                     >
                       {tr.allChats} ({sessions.length})
                     </button>
