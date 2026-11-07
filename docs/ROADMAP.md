@@ -1,13 +1,20 @@
-# Remaining delivery gates — desktop priority
+# Desktop delivery checkpoint — 7 November 2026
 
-Web usage/deployment and two-client web/desktop acceptance are explicitly deferred by the owner.
+Windows runtime `38ba8c1` is installed. Both CI jobs passed, including 71 unit tests, 21 browser flows and six Rust tests. Web usage/deployment and two-client acceptance remain deferred by the owner.
 
-1. **Installed acceptance:** the owner confirmed Settings notification banner and sound. Background submission and clean-restart duplicate suppression passed. Complete tray/minimized, missed startup, sleep/resume, quiet hours, snooze/reschedule and toast actions using LIVE_TEST.md; these remain real user checks.
-2. **Data and session recovery:** real native login, push/pull and clean-restart session restoration passed. Offline SQLite graph persistence and duplicate-safe backup restoration have automated coverage. Real expiry/rotation, sign-out, full populated upgrade and restore acceptance remain open.
-3. **Desktop features:** Markdown preview, weekday/weekly habit goals and streaks, global capture, persisted workspace sizing, custom focus presets, dirty-form/native close warning and 15-minute day-planner dropping/keyboard movement are implemented in b2868c1. Native spot checks and the user's final live test follow; prayer times can use manually scheduled tasks/routines, with no location/calculation provider.
-4. **Performance:** main JS decreased from about 744 kB to 615 kB; gzip 223 kB to 182 kB. Measure the installed build using PERFORMANCE.md. The previous 430.25 MiB summed working set exceeded the 60–120 MiB target; no claim of achieving that target yet.
-5. **Calendar:** five source-confirmed future Anadolu eKampüs sessions were imported into native SQLite with 30-minute sound-enabled alarms after taking a backup. No inferred recurring lessons were created. This is a one-time import, not automatic schedule monitoring.
-6. **MCP and conversation references:** local opt-in and Codex client registration are configured; twelve stdio tools passed an actual note write/read check. Conversation titles and links/references can be imported from the connected app's paginated history. This is a one-time index, not automatic monitoring, full transcript ingestion or Codex desktop deep-link launching.
-7. **Separate architecture work:** normalize the envelope store, complete server-side domain constraints, incremental sync/realtime and partial graph transaction recovery. Register the SQL-applied initial migration in Supabase CLI history before future db push. These are not silently treated as completed desktop work.
+Delivered and checked:
 
-No SaaS, paid AI, external messaging automation or hidden data collection is planned.
+- Modern dashboard, learning summary, direct Sohbetler route and persistent light/dark/system theme. Actual installed light and dark screens observed; light task/sidebar contrast corrected.
+- Five lessons with sound-enabled 30-minute alarms, five PDF unit counters and nine all-day academic dates with independent preparation reminders. User progress was preserved. This is a one-time import, not monitoring of schedule changes.
+- Real native cloud login and push/pull, populated installer upgrade and clean-restart session/data persistence. Long imported titles now match the cloud's existing limit without losing original text; non-settings outbox cleared.
+- Native overdue-startup, quiet-hours release and hidden-tray submission each produced one persistent event, retained without duplication after restart. Earlier Settings banner and sound were owner-confirmed; no new visual/audio pass is inferred for these scheduler probes.
+- Complete populated backup restored into an isolated SQLite database; duplicate import, newer-edit preservation and reopen passed for all 1,501 records.
+- Local opt-in MCP registered in Codex; twelve actual tools available. One-time index contains 1,280 ChatGPT links and 181 Codex references, including archived sessions. It does not contain complete transcripts or automatically ingest new chats.
+
+Remaining live acceptance: sleep/resume, abrupt-crash windows, toast button actions, minimized banner/audio, physical offline/reconnect and genuine session expiry/rotation. See LIVE_TEST.md for precise boundaries; browser tests cannot close native/cloud scenarios. The current version can be used for the owner's live test with these limitations recorded.
+
+Performance remains measurable improvement work. The original 60–120 MB aspiration was explicitly not a guaranteed requirement. Current samples and their workload limitations are in PERFORMANCE.md; the target has not been achieved and low steady idle CPU has not been established by active/startup samples.
+
+Separate future work: full chat transcript import, automatic incremental history ingestion, incremental/realtime cloud sync, normalized relational storage and partial graph recovery. Register the already-applied initial migration in Supabase CLI history before future db push. Password recovery/email changes require SMTP. None is silently marked complete.
+
+No SaaS, paid AI, hidden collection or external messaging automation is planned. Windows startup preference remains the owner's choice.

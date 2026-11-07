@@ -88,3 +88,21 @@ Source `0bed913` passed https://github.com/eFurkanSngl/LifeOS/actions/runs/42365
 The authorized full history index added 1,280 ChatGPT links and 181 Codex references, including eleven archived Codex sessions. A second run skipped all 1,461 without adding records. Private JSON backup preceded the import. Schema-validated preservation checks passed for five lessons, five PDF counters at 0/8, nine all-day academic dates, nine independent preparation reminders and five correctly offset sound-enabled lesson alarms. No source message bodies were copied.
 
 The configured MCP transport connected from outside the repository and exposed twelve tools. The actual `mcp__lifeos` tools were then available in the current chat and successfully read the setup note and all nineteen tasks after import. This verifies current client registration and actual calls, beyond an SDK-only smoke test. Computer Use initialization still fails with CryptUnprotectData, so no latest installed screen or deep-link pass is claimed. The new browser screenshot contains synthetic test records and is labeled accordingly.
+
+## Modern workspace installed acceptance - 7 November 2026
+
+Final runtime `38ba8c1` passed frontend and Windows jobs: https://github.com/eFurkanSngl/LifeOS/actions/runs/42377798623. This includes 71 unit tests, 21 browser flows, native check, six Rust tests and NSIS packaging. Installer SHA256 `DF3D4D4839F66CA872602CDB6BD529CC327F834F5C58AEC5B12FD7D193CC4BE7`; silent update exited 0. Installed executable: 9,635,840 bytes. A private populated backup preceded updates. No user records were removed.
+
+Computer Use recovered through the documented @oai/sky runtime. Native observation confirmed the redesigned dashboard, all five PDF trackers at 0/8, future lesson/exam summaries, Sohbetler with 1,280 ChatGPT and 181 Codex references, and readable task/sidebar titles in light mode. The light preference survived installer update and relaunch. Dark mode was also observed in the final runtime. User interaction began during the final observation, so automation stopped without dismissing the user's form.
+
+Three independent QA reminders exercised the native queue (timestamps UTC):
+
+| Scenario                                | Due      | Persistent submission | Result                                                |
+| --------------------------------------- | -------- | --------------------- | ----------------------------------------------------- |
+| Fully closed past deadline, then launch | 13:26:00 | 13:31:20              | One event on startup                                  |
+| Quiet hours active, then restored off   | 13:38:19 | 13:38:50              | Pending/no event while quiet, one event after restore |
+| Close-to-tray, process still running    | 13:40:13 | 13:40:15              | One event with window hidden                          |
+
+A later clean close/update/relaunch retained exactly one event for each reminder; no duplicate appeared. These are accepted OS submission checks, not a fresh visible-banner or audible-delivery confirmation. The owner previously confirmed Settings banner and sound. Quiet-hours and close-to-tray settings were restored to their original values; Windows startup and DND were not changed. Single-instance launch returned the hidden app. No crash, sleep, toast-action or credential-rotation pass is inferred.
+
+The complete populated export contained 1,501 records. An isolated SQLite restore preserved every payload and tombstone; reimport skipped all 1,501, a newer note edit survived, and reopening the isolated database preserved it. The live database was not restored or cleared. Native cloud session restoration and an empty non-settings outbox were observed after update. Private chat titles, backups and database files remain ignored.

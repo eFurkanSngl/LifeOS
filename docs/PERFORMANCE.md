@@ -24,3 +24,19 @@ Process identities did not change during each interval. Background memory reduct
 With five real lesson tasks and their alarms in the previous cd04e8a package, the foreground planner baseline summed 451.09 MiB working set and 337.81 MiB private bytes over LifeOS plus six profile-matched WebView processes. This is a different workload from the initial empty-app sample.
 
 The follow-up Windows patch requests WebView2's LOW memory target when the app loses focus and restores NORMAL on focus. It uses the optional ICoreWebView2_19 interface and silently keeps the runtime default if unsupported. It does not suspend the native queue or modify browser security switches. The declared Tauri minor is pinned to match the platform-handle interface. The new installed measurement must be recorded before asserting a benefit.
+
+## Original target boundary and 7 November populated samples
+
+The original master specification calls approximately 60–120 MB an aspirational desktop idle target, explicitly not a guaranteed requirement. Earlier checklist wording incorrectly elevated it to a mandatory acceptance gate; that wording is corrected. The target remains unmet, and this correction does not constitute a measured performance pass.
+
+The app now contains 1,501 records. The same script counts one LifeOS process plus six WebView descendants. All intervals were approximately 30 seconds with stable process identities:
+
+| Runtime/state             | Working set MiB | Private bytes MiB | CPU % of one core | Workload caveat                                                       |
+| ------------------------- | --------------: | ----------------: | ----------------: | --------------------------------------------------------------------- |
+| b5ac288 visible dashboard |          488.06 |            285.14 |             9.969 | Following UI checks and quiet-hour queue release                      |
+| b5ac288 hidden to tray    |           64.87 |            254.93 |             3.324 | Includes one due reminder and cloud activity                          |
+| 38ba8c1 visible dashboard |          407.20 |            263.62 |            26.577 | Immediately after restart; includes startup/sync and user interaction |
+
+These are observed samples, not controlled steady-idle benchmarks. Do not claim low idle CPU, a percentage performance gain, or the memory target from them. Summed resident working sets can double-count shared pages; private bytes are distinct. The tray's resident reduction is observable without suspending the native queue: its due QA reminder was submitted once during the interval. Current implementation retains LOW memory target only when unfocused and restores NORMAL on focus; it does not force low-memory mode on an active editor. Private raw measurements remain in ignored .tools files.
+
+The current sync patch batches record-change notifications and reads local records once per pull rather than once per remote record; concurrency and bounded-read tests pass. These checks demonstrate bounded work, not a measured idle CPU guarantee. A quiet, interaction-free long-duration trace remains future optimization evidence.

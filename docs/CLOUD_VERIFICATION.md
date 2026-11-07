@@ -33,3 +33,11 @@ A clearly marked QA note, `[Doğrulama] LifeOS bulut bağlantısı`, was capture
 A clean native process restart restored the signed-in session without password entry, preserved the QA note, and completed sync at 19:31:54 Europe/Istanbul. No credential contents were inspected. See NATIVE_VERIFICATION.md.
 
 Verify separate web/desktop clients, offline edits, conflicts, sign-out, session expiry/rotation and storage failure recovery. Public signup remains disabled. SMTP-dependent recovery/email-change flows and CLI migration-history registration remain open.
+
+## Conversation import compatibility and current sync - 7 November 2026
+
+The actual native client exposed a cloud check-constraint failure: seven imported Codex titles exceeded the existing 240-character domain limit (longest 1,978). The source importer now accepts bounded source titles, normalizes the display title to 240 and preserves the complete original title in notes. Canonical validation remains aligned with SQL. Legacy JSON backups receive the same lossless normalization. Tests cover cloud constraint compatibility and legacy restoration.
+
+A private full backup preceded version-checked normalization of the seven local records. No cloud DDL, RLS policy or unrelated project was changed. The real signed-in native client then cleared its outbox: 181 Codex references, 1,280 ChatGPT links, 19 tasks, two notes and all reminder records had dirty=0. Settings are local-only and intentionally remain dirty. Native Settings showed successful sync at 16:23:30 Europe/Istanbul; subsequent installed updates retained the session and clean outbox, including three QA reminders. A recovered sync error now clears without hiding unrelated local errors.
+
+The connected Supabase administrative plugin currently exposes another account and does not list LifeOS. It was not used to access or mutate another project. No credentials were inspected. CLI migration history, multi-client conflicts, expiry/rotation and SMTP recovery remain outside this verified desktop checkpoint.

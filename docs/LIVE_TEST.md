@@ -28,7 +28,7 @@ Web ve iki istemci testi ertelendi. Yeni native pakette aşağıdaki testleri s�
 
 - [ ] Açılış, beş dakika boşta ve takvim/not kullanımında takılma yok.
 - [ ] LifeOS ve ilişkili WebView süreçlerini birlikte ölç. Paylaşılan çalışma kümesi özel bellek değildir.
-- [ ] 60–120 MiB hedefi sağlanmadan performans tamamlandı sayılmaz; ölçüm için PERFORMANCE.md kullan.
+- [x] Bellek ve CPU ölçümü kaydedildi; PERFORMANCE.md metrikleri ve sınırlarını açıklar. İlk şartnamedeki 60-120 MB değeri garanti edilen kabul koşulu değil, ulaşılmak istenen bir hedeftir. Hedef henüz sağlanmadı.
 
 ## 5. Özellikler ve dersler
 
@@ -42,3 +42,15 @@ Web ve iki istemci testi ertelendi. Yeni native pakette aşağıdaki testleri s�
 - [ ] Sınav / PDF / Canlı ders filtresi ve ayrı Hatırlatıcılar sayfası. Sınav aralıkları saat uydurmadan ilgili günlerde; hazırlık uyarıları bir gün önce 18.00.
 
 Yalnızca geçmeyen adımı, beklenen/gerçek davranışı ve gizli bilgi içermeyen görüntüyü bildir. Geçmeyen madde açık kalır.
+
+## 7 Kasım güncel kurulum kontrolü
+
+`38ba8c1` kuruldu; 71 birim testi, 21 tarayıcı akışı ve Windows native kontrol/test/paket işi geçti. Açık tema tercihi güncelleme/yeniden açılışta korundu; açık ve koyu görünüm gerçek pencerede görüldü. 1.501 kayıt korundu.
+
+- [x] Tamamen kapalıyken zamanı geçen uyarı açılışta tek gönderim kaydı üretti; sonraki açılış yinelemedi.
+- [x] Sessiz saatlerde pending kaldı; eski sessiz saat tercihi geri yüklenince tek gönderim işlendi.
+- [x] Tepside gizli pencereyle zamanlı uyarı tek kez işlendi; önceki tepsi tercihi geri yüklendi.
+- [x] Dolu yedek ayrı SQLite profilinde geri yüklendi; ikinci aktarım tüm kayıtları atladı, yeni düzenleme ve yeniden açılış korundu. Canlı profil değiştirilmedi.
+- [x] Installer güncellemesi ders, PDF, sohbet kayıtlarını ve bulut oturumunu korudu; kullanıcı kayıtlarının eşitleme kuyruğu boş.
+
+Bu üç uyarının sonucu Windows'a gönderimdir; yeni banner/ses onayı yerine geçmez. Yukarıdaki birleşik maddelerde henüz gözlenmeyen adımlar açık kalır. Uyku/uyanma, çökme, toast düğmeleri, oturum süresi dolması ve fiziksel ağ kesintisi testleri ayrıca yapılabilir; bunlar yapılmış gibi raporlanmadı.

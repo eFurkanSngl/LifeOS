@@ -21,18 +21,18 @@
 ![Açık çalışma alanı — sentetik test verisi](docs/screenshots/workspace-light-demo.png)
 ![Koyu çalışma alanı — sentetik test verisi](docs/screenshots/workspace-dark-demo.png)
 
-| Alan              | İşlev                                                                                   |
-| ----------------- | --------------------------------------------------------------------------------------- |
-| Görev ve projeler | Öncelik, kategori, bağımsız tekrar kayıtları, kanban, kilometre taşları                 |
+| Alan              | İşlev                                                                                                              |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Görev ve projeler | Öncelik, kategori, bağımsız tekrar kayıtları, kanban, kilometre taşları                                            |
 | Eğitim            | Canlı ders / sınav / PDF filtreleri, tamamlanan/toplam ünite, kaynak bağlantıları, saat atanmayan sınav aralıkları |
-| Takvim            | Gün/hafta/ay; gün görünümünde 15 dakikalık sürükleme; Alt+yön tuşlarıyla taşıma         |
-| Hatırlatıcı       | Kalıcı kuyruk, ses, erteleme, yeniden planlama, sessiz saat ve gönderim geçmişi         |
-| Rutin             | Günlük, hafta içi, haftalık hedef ve frekansa uygun seri                                |
-| Not               | Otomatik kayıt, güvenli Markdown önizleme, taslak çakışması koruması, göreve dönüştürme |
-| Odak              | Zaman damgalı sayaç, duraklat/devam, özel favori süre, geçmiş                           |
-| Kariyer           | Kişiler, başvurular, görüşmeler, takip hatırlatmaları                                   |
-| Çalışma alanı     | ChatGPT bağlantıları, manuel Codex referansları, kalıcı panel genişliği                 |
-| Veri              | JSON yedek/geri yükleme, sürüm koruması, kaydedilmemiş form ve native kapatma uyarısı   |
+| Takvim            | Gün/hafta/ay; gün görünümünde 15 dakikalık sürükleme; Alt+yön tuşlarıyla taşıma                                    |
+| Hatırlatıcı       | Kalıcı kuyruk, ses, erteleme, yeniden planlama, sessiz saat ve gönderim geçmişi                                    |
+| Rutin             | Günlük, hafta içi, haftalık hedef ve frekansa uygun seri                                                           |
+| Not               | Otomatik kayıt, güvenli Markdown önizleme, taslak çakışması koruması, göreve dönüştürme                            |
+| Odak              | Zaman damgalı sayaç, duraklat/devam, özel favori süre, geçmiş                                                      |
+| Kariyer           | Kişiler, başvurular, görüşmeler, takip hatırlatmaları                                                              |
+| Çalışma alanı     | ChatGPT bağlantıları, manuel Codex referansları, kalıcı panel genişliği                                            |
+| Veri              | JSON yedek/geri yükleme, sürüm koruması, kaydedilmemiş form ve native kapatma uyarısı                              |
 
 Markdown başlık, liste, kalın metin ve kodu destekler. HTML çalıştırmaz ve uzak görsel yüklemez; tam bir Markdown editörü değildir.
 
@@ -62,9 +62,13 @@ Web yayını ve ücretli API gerekmez. ChatGPT desteği kullanılan istemcinin y
 
 ## Doğrulama ve sınırlar
 
-**69 otomatik test, 21 tarayıcı akışı**, TypeScript, lint ve üretim derlemeleri geçti. Native kontrol/test/paket sonucu Actions’ta ayrıca izlenir. Önceki kurulu pakette gerçek bulut girişi, masaüstü→Supabase→masaüstü aktarımı, temiz yeniden başlatmada oturum/kayıt korunumu ve tek arka plan gönderimi doğrulandı. Kullanıcı bildirim ve sesin çalıştığını doğruladı.
+**71 otomatik test, 21 tarayıcı akışı**, TypeScript, lint, üretim derlemeleri ve Windows native kontrol/test/paket işi [başarıyla geçti](https://github.com/eFurkanSngl/LifeOS/actions/runs/42377798623). `38ba8c1` Windows paketi kuruldu. Gerçek bulut girişi ve aktarımı, güncelleme/yeniden açılışta oturum ve kayıt korunumu doğrulandı. Kullanıcı daha önce bildirim ve sesin çalıştığını doğruladı.
 
 Yeni global kısayol ve native form kapatma koruması dahil [canlı test listesi](docs/LIVE_TEST.md) henüz bütünüyle kapanmış değildir. Uyku/çökme/tepsi ve toast eylemlerinin tam matrisi açıktır. Ana JS yaklaşık 744 kB’den 615 kB’ye indi; bu RAM ölçümü değildir. **60–120 MiB bellek hedefi henüz sağlandı diye raporlanmıyor.**
+
+Son kurulumda kapalıyken süresi dolan, sessiz saatlerde bekleyen ve tepside zamanı gelen üç QA hatırlatıcısı ayrı ayrı tek gönderim kaydı üretti; sonraki açılış yinelemedi. Bu, Windows'a gönderim kontrolüdür. Dolu yedekteki 1.501 kayıt ayrı SQLite profilinde korunarak geri yüklendi; tekrar aktarım ve yeni düzenleme koruması geçti. Kullanıcı kayıtları ve bulut oturumu installer güncellemesinde korundu. Ayrıntılar [native doğrulama](docs/NATIVE_VERIFICATION.md) dosyasında.
+
+İlk şartnamedeki 60–120 MB değeri garanti edilen bir koşul değil, iyileştirme hedefidir. Güncel dolu profilde tepside 65 MiB çalışma kümesi / 255 MiB özel bellek; açılış sonrası görünür örnekte 407 MiB / 264 MiB ölçüldü. Örnekler bildirim, açılış veya etkileşim içerir; sürekli boşta CPU sonucu sayılmaz. [Ölçüm sınırları](docs/PERFORMANCE.md).
 
 Web kullanımı/yayını ve iki istemci kabul testi kullanıcı tercihiyle ertelendi. Veri modeli sürümlü tipli zarflardır; tam normalize ilişkisel model, incremental/realtime sync ve otomatik Codex keşfi ayrıca açıktır.
 
