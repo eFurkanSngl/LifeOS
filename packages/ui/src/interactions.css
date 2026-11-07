@@ -5,6 +5,18 @@
 .note-tags {
   color: var(--blue);
 }
+.filter-tabs button.selected,
+.selected.button {
+  background: var(--accent-soft);
+  color: var(--blue);
+  border-color: var(--blue);
+}
+.filter-tabs button:hover {
+  color: var(--text);
+}
+.note-actions .text-button {
+  font-size: 12px;
+}
 .nav-item,
 .button,
 .icon-button,
