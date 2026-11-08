@@ -144,8 +144,10 @@ export function expandRecurrence(
 ): { id: string; data: Task }[] {
   const t = entity.data,
     r = t.recurrence;
-  if (!r || !t.scheduledAt || t.seriesId) return [];
-  const anchor = toZonedTime(t.scheduledAt, r.timezone),
+  if (!r || (!t.scheduledAt && !t.dueDate) || t.seriesId) return [];
+  const anchor = t.scheduledAt
+      ? toZonedTime(t.scheduledAt, r.timezone)
+      : new Date(t.dueDate + "T12:00:00"),
     anchorDay = format(anchor, "yyyy-MM-dd"),
     time = format(anchor, "HH:mm:ss");
   const start = new Date(from + "T12:00:00");
@@ -172,9 +174,10 @@ export function expandRecurrence(
           : monthDiff % r.interval === 0 &&
             d.getDate() === addMonths(anchor, monthDiff).getDate();
     if (matches) {
-      let scheduledAt: string;
+      let scheduledAt: string | undefined;
       try {
-        scheduledAt = localInstant(date + "T" + time, r.timezone);
+        if (t.scheduledAt)
+          scheduledAt = localInstant(date + "T" + time, r.timezone);
       } catch {
         continue;
       }
@@ -188,7 +191,9 @@ export function expandRecurrence(
           status: "planned",
           seriesId: entity.id,
           occurrenceDate: date,
-          scheduledAt,
+          ...(scheduledAt
+            ? { scheduledAt }
+            : { dueDate: date, allDay: true, endDate: undefined }),
         },
       });
     }

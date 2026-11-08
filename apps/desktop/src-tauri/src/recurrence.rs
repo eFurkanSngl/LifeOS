@@ -22,13 +22,20 @@ pub fn expand(template: &Record, now: DateTime<Utc>) -> Result<Vec<Record>, Stri
         .unwrap_or("Europe/Istanbul")
         .parse()
         .map_err(|_| "Invalid recurrence timezone")?;
-    let anchor = DateTime::parse_from_rfc3339(
-        data["scheduledAt"]
+    let (anchor, anchor_time) = if let Some(start) = data["scheduledAt"].as_str() {
+        let instant = DateTime::parse_from_rfc3339(start)
+            .map_err(|_| "Invalid recurrence start")?
+            .with_timezone(&zone);
+        (instant.date_naive(), Some(instant.time()))
+    } else {
+        let date = data["dueDate"]
             .as_str()
-            .ok_or("Recurrence needs a start")?,
-    )
-    .map_err(|_| "Invalid recurrence start")?
-    .with_timezone(&zone);
+            .ok_or("Recurrence needs a start date")?;
+        (
+            NaiveDate::parse_from_str(date, "%Y-%m-%d").map_err(|_| "Invalid recurrence date")?,
+            None,
+        )
+    };
     let first = now.with_timezone(&zone).date_naive();
     let interval = rule["interval"].as_i64().unwrap_or(1).clamp(1, 365);
     let frequency = rule["frequency"].as_str().unwrap_or("daily");
@@ -39,14 +46,14 @@ pub fn expand(template: &Record, now: DateTime<Utc>) -> Result<Vec<Record>, Stri
             .checked_add_days(Days::new(offset))
             .ok_or("Calendar overflow")?;
         let text = date.format("%Y-%m-%d").to_string();
-        if date < anchor.date_naive()
+        if date < anchor
             || rule["until"]
                 .as_str()
                 .is_some_and(|end| text.as_str() > end)
         {
             continue;
         }
-        let days = (date - anchor.date_naive()).num_days();
+        let days = (date - anchor).num_days();
         let months = i64::from(date.year() - anchor.year()) * 12 + i64::from(date.month())
             - i64::from(anchor.month());
         let matches = match frequency {
@@ -76,8 +83,13 @@ pub fn expand(template: &Record, now: DateTime<Utc>) -> Result<Vec<Record>, Stri
         if !matches {
             continue;
         }
-        let Some(at) = local_instant(zone, date.and_time(anchor.time())) else {
-            continue;
+        let at = if let Some(time) = anchor_time {
+            let Some(at) = local_instant(zone, date.and_time(time)) else {
+                continue;
+            };
+            Some(at)
+        } else {
+            None
         };
         let mut occurrence = data.clone();
         let object = occurrence.as_object_mut().ok_or("Invalid task")?;
@@ -86,11 +98,17 @@ pub fn expand(template: &Record, now: DateTime<Utc>) -> Result<Vec<Record>, Stri
         object.insert("seriesId".into(), template.id.clone().into());
         object.insert("occurrenceDate".into(), text.clone().into());
         object.insert("status".into(), "planned".into());
-        object.insert(
-            "scheduledAt".into(),
-            at.to_rfc3339_opts(chrono::SecondsFormat::Millis, true)
-                .into(),
-        );
+        if let Some(at) = at {
+            object.insert(
+                "scheduledAt".into(),
+                at.to_rfc3339_opts(chrono::SecondsFormat::Millis, true)
+                    .into(),
+            );
+        } else {
+            object.insert("dueDate".into(), text.clone().into());
+            object.insert("allDay".into(), true.into());
+            object.remove("endDate");
+        }
         let id = format!(
             "{}{}0000",
             template.id.get(..24).ok_or("Invalid template ID")?,
@@ -166,6 +184,33 @@ mod tests {
         let alarm = reminder(&rows[0], Utc::now()).unwrap();
         assert_eq!(alarm.data["fireAt"], "2026-11-05T10:45:00.000Z");
         assert_eq!(alarm.id, "92345678-1234-4000-8000-202611050000");
+    }
+    #[test]
+    fn date_only_daily_does_not_invent_time_or_alarm() {
+        let mut source = template("2026-11-08T00:00:00Z", "Europe/Istanbul", "daily");
+        source.data.as_object_mut().unwrap().remove("scheduledAt");
+        source.data["dueDate"] = "2026-11-08".into();
+        source.data["allDay"] = true.into();
+        source.data["recurrence"]["until"] = "2026-11-10".into();
+        let mut rows = expand(&source, "2026-11-08T00:00:00Z".parse().unwrap()).unwrap();
+        assert_eq!(rows.len(), 3);
+        assert_eq!(rows[0].id, "12345678-1234-4000-8000-202611080000");
+        assert_eq!(rows[1].data["dueDate"], "2026-11-09");
+        assert!(rows
+            .iter()
+            .all(|r| r.data["scheduledAt"].is_null() && reminder(r, Utc::now()).is_none()));
+        rows[0].data["status"] = "completed".into();
+        assert_eq!(rows[1].data["status"], "planned");
+    }
+    #[test]
+    fn date_only_monthly_clamps_without_a_clock() {
+        let mut source = template("2026-01-31T11:00:00Z", "America/New_York", "monthly");
+        source.data.as_object_mut().unwrap().remove("scheduledAt");
+        source.data["dueDate"] = "2026-01-31".into();
+        let rows = expand(&source, "2026-02-01T12:00:00Z".parse().unwrap()).unwrap();
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].data["dueDate"], "2026-02-28");
+        assert!(rows[0].data["scheduledAt"].is_null());
     }
     #[test]
     fn dst_gap_is_skipped_and_fold_uses_first_instant() {

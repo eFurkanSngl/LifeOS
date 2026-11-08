@@ -585,6 +585,68 @@ test("creates independent recurring occurrences", async ({ page }) => {
     "10",
   );
 });
+test("repeats date-only tasks without assigning an hour or creating alarms", async ({
+  page,
+}) => {
+  await page.getByRole("button", { name: "İlk görevini ekle" }).click();
+  await page.getByLabel("Başlık *").fill("Untimed daily learning");
+  await page.getByLabel("Tüm gün (oturum saati henüz belli değil)").check();
+  const date = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Istanbul",
+  }).format(new Date());
+  await page.getByLabel("Başlangıç", { exact: true }).fill(date);
+  await page.getByLabel("Tekrar", { exact: true }).selectOption("daily");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Kaydet" })
+    .click();
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  await page
+    .getByRole("navigation")
+    .getByRole("button", { name: "Görevler" })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Tamamla: Untimed daily learning" }),
+  ).toHaveCount(35);
+  const stored = await page.evaluate(async () => {
+    const req = indexedDB.open("lifeos-v1", 1);
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+    const rows = await new Promise<
+      { kind: string; data: Record<string, unknown> }[]
+    >((resolve, reject) => {
+      const r = db.transaction("records").objectStore("records").getAll();
+      r.onsuccess = () => resolve(r.result);
+      r.onerror = () => reject(r.error);
+    });
+    db.close();
+    return rows;
+  });
+  const occurrences = stored.filter(
+    (r) => r.kind === "task" && r.data.seriesId,
+  );
+  expect(occurrences).toHaveLength(35);
+  expect(
+    occurrences.every(
+      (r) =>
+        !r.data.scheduledAt &&
+        r.data.allDay === true &&
+        r.data.dueDate === r.data.occurrenceDate,
+    ),
+  ).toBe(true);
+  expect(stored.filter((r) => r.kind === "reminder")).toHaveLength(0);
+  await page
+    .getByRole("button", { name: "Tamamla: Untimed daily learning" })
+    .first()
+    .click();
+  await page.reload();
+  await expect(
+    page.getByRole("button", { name: "Tamamla: Untimed daily learning" }),
+  ).toHaveCount(34);
+});
+
 test("checks a habit and restores the log after reload", async ({ page }) => {
   await page
     .getByRole("navigation")

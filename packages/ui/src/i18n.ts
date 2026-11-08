@@ -1,4 +1,6 @@
 export const tr = {
+  recurrenceNeedsStart:
+    "Tekrar için başlangıç günü veya planlanan saat gerekli.",
   agendaView: "Günlük plan görünümü",
   timedPlan: "Saatli plan",
   todayTasks: "Bugünkü görevler",

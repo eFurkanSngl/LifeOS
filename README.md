@@ -56,7 +56,7 @@ Sayaçlar kayıtlarından hesaplanır. Örnekteki çalışma süresi, kategoriye
 - **Canlı ders:** ders kodu, kaynak bağlantısı ve programdaki başlangıç saati.
 - **Sınav / akademik tarih:** bir gün veya tarih aralığı. Kesin oturum saati bilinmiyorsa tüm gün kaydı kullanılır.
 - **PDF / ünite çalışması:** tamamlanan ünite / toplam ünite. `+` ve `−` ile ilerlemeyi güncelle; toplamı aşan değer kabul edilmez. Bu özellik PDF dosyasını okuyup tamamladığın üniteyi kendiliğinden çıkarmaz.
-- **Tekrarlar:** tekrar serisi ve bağımsız gerçekleşme kayıtları ayrı yönetilir; birini tamamlamak bütün seriyi tamamlamaz.
+- **Tekrarlar:** tekrar serisi ve bağımsız gerçekleşme kayıtları ayrı yönetilir; birini tamamlamak bütün seriyi tamamlamaz. Saat istemiyorsan tüm gün seçeneğiyle başlangıç gününü ve günlük/haftalık tekrarı seçebilirsin. Bu kayıtlar için saat veya bildirim alarmı üretilmez.
 
 Filtrelerle canlı ders, sınav veya PDF kayıtlarını ayırabilirsin. Kişisel ders programı aktarımı tek seferliktir; üniversite sitesindeki değişiklikler otomatik izlenmez. Yeni kullanıcıların kendi derslerini eklemesi gerekir.
 

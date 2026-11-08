@@ -587,8 +587,8 @@ export function RecordForm({
               timezone: store.settings.timezone,
             }
           : undefined;
-        if (repeat && !data.scheduledAt)
-          throw new Error("Tekrar için planlanan başlangıç gerekli.");
+        if (repeat && !data.scheduledAt && !data.dueDate)
+          throw new Error(tr.recurrenceNeedsStart);
         if (data.status === "completed" && !data.completedAt)
           data.completedAt = new Date().toISOString();
         if (data.status !== "completed") delete data.completedAt;

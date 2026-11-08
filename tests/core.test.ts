@@ -74,6 +74,38 @@ describe("task validation", () => {
     ).toBe(false));
 });
 describe("timezone and bounded recurrence", () => {
+  it("keeps date-only daily occurrences independent without inventing an hour", () => {
+    const source = template({
+      scheduledAt: undefined,
+      dueDate: "2026-11-08",
+      allDay: true,
+    });
+    const rows = expandRecurrence(source, "2026-11-08", 3);
+    expect(rows.map((r) => r.data.dueDate)).toEqual([
+      "2026-11-08",
+      "2026-11-09",
+      "2026-11-10",
+    ]);
+    expect(rows.every((r) => r.data.allDay && !r.data.scheduledAt)).toBe(true);
+    expect(rows[0].id).toBe(occurrenceId(source.id, "2026-11-08"));
+    rows[0].data.status = "completed";
+    expect(rows[1].data.status).toBe("planned");
+  });
+  it("applies date-only monthly and until rules across month end", () => {
+    const source = template({
+      scheduledAt: undefined,
+      dueDate: "2026-01-31",
+      allDay: true,
+      recurrence: {
+        frequency: "monthly",
+        until: "2026-02-28",
+        timezone: "America/New_York",
+      },
+    });
+    const rows = expandRecurrence(source, "2026-02-01", 35);
+    expect(rows.map((r) => r.data.dueDate)).toEqual(["2026-02-28"]);
+    expect(rows[0].data.scheduledAt).toBeUndefined();
+  });
   it("uses Istanbul calendar dates around UTC midnight", () =>
     expect(today("Europe/Istanbul", new Date("2026-11-05T22:00Z"))).toBe(
       "2026-11-06",
