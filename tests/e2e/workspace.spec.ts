@@ -641,6 +641,9 @@ test("repeats date-only tasks without assigning an hour or creating alarms", asy
     .getByRole("button", { name: "Tamamla: Untimed daily learning" })
     .first()
     .click();
+  await expect(
+    page.getByRole("button", { name: "Tamamla: Untimed daily learning" }),
+  ).toHaveCount(34);
   await page.reload();
   await expect(
     page.getByRole("button", { name: "Tamamla: Untimed daily learning" }),
